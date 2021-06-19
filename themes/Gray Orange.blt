@@ -1,0 +1,14 @@
+[THEME]
+
+AuthorName = 0603
+themename = Fusion
+BgColor = (47,47,43)
+BaseColor = (25,25,25)
+ButtonColor = (255,113,0)
+ButtonTextColor = (255,255,255)
+SliderColor = (255,183,10)
+LinkColor = (42,130,218)
+TextColor = (255,255,255)
+EditableTextColor = (255,255,255)
+ToolTipBaseColor = (20,20,20)
+ToolTipTextColor = (255,255,255)
