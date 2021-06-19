@@ -1,0 +1,14 @@
+[THEME]
+
+AuthorName = Mr. Kat
+themename = Fusion
+BgColor = (35,25,25)
+BaseColor = (80,75,75)
+ButtonColor = (225,0,0)
+ButtonTextColor = (255,255,255)
+SliderColor = (255,186,0)
+LinkColor = (82,212,255)
+TextColor = (255,250,191)
+EditableTextColor = (255,255,255)
+ToolTipBaseColor = (20,20,20)
+ToolTipTextColor = (255,255,255)
