@@ -18,8 +18,12 @@ import gui_main
 settings = configparser.ConfigParser()
 ThemeInfo = configparser.ConfigParser()
 
+cur_thm = 'Lavender'
+
 if path.isfile('settings.ini'):
 	settings.read('settings.ini')
+	cur_thm = str(settings['EXTRAS']['CURRENT_THEME'])
+
 
 #--------------------THEMING-----------------------#
 
@@ -35,47 +39,43 @@ if not os.path.exists(ThemeFolder):
 
 with os.scandir(ThemeFolder) as DirList:
 	for inputt in DirList:
-		if inputt.is_file() and inputt.name.endswith('blt'):
+		if inputt.is_file() and inputt.name.endswith('.blt'):
 			ThemeList.append(inputt.name[:-4])
 
+def setTheme2(app, tname):
 
-if not path.isfile('theme.ini'):
-	with open('theme.ini', 'w') as file :
-		file.write(
-'''[THEME]
+	ThemeInfo.read(ThemeFolder + tname + '.blt')
+	print('Setting Theme to '+ tname)
 
-# Vista/Windows/Fusion
-themename = Fusion
+	THAMES = ThemeInfo['THEME']
+	ThemeName = THAMES['ThemeName']
 
-# ALL VALUES ARE RGB :-
-BgColor = (40,40,50)
-BaseColor = (25,25,25)
-ButtonColor = (50,50,200)
-ButtonTextColor = (255,255,255)
-SliderColor = (42,200,220)
-LinkColor = (42,130,218)
-TextColor = (255,255,255)
-EditableTextColor = (255,255,255)
-ToolTipBaseColor = (20,20,20)
-ToolTipTextColor = (255,255,255)
-''')
+	BgColor = eval(THAMES['BgColor'])
+	BaseColor = eval(THAMES['BaseColor'])
+	ButtonColor = eval(THAMES['ButtonColor'])
+	ButtonTextColor = eval(THAMES['ButtonTextColor'])
+	SliderColor = eval(THAMES['SliderColor'])
+	LinkColor = eval(THAMES['LinkColor'])
+	TextColor = eval(THAMES['TextColor'])
+	EditableTextColor = eval(THAMES['EditableTextColor'])
+	ToolTipBaseColor = eval(THAMES['ToolTipBaseColor'])
+	ToolTipTextColor = eval(THAMES['ToolTipTextColor'])
 
-ThemeInfo.read('theme.ini')
-THAMES = ThemeInfo['THEME']
-ThemeName = THAMES['ThemeName']
-
-BgColor = eval(THAMES['BgColor'])
-BaseColor = eval(THAMES['BaseColor'])
-ButtonColor = eval(THAMES['ButtonColor'])
-ButtonTextColor = eval(THAMES['ButtonTextColor'])
-SliderColor = eval(THAMES['SliderColor'])
-LinkColor = eval(THAMES['LinkColor'])
-TextColor = eval(THAMES['TextColor'])
-EditableTextColor = eval(THAMES['EditableTextColor'])
-ToolTipBaseColor = eval(THAMES['ToolTipBaseColor'])
-ToolTipTextColor = eval(THAMES['ToolTipTextColor'])
-
-#-------------------------------------------------------#
+	# Creating Dark Palette
+	myPalette = QPalette()
+	myPalette.setColor(QPalette.Window, QColor(int(BgColor[0]), int(BgColor[1]), int(BgColor[2])))
+	myPalette.setColor(QPalette.WindowText, QColor(int(TextColor[0]), int(TextColor[1]), int(TextColor[2])))
+	myPalette.setColor(QPalette.Base, QColor(int(BaseColor[0]), int(BaseColor[1]), int(BaseColor[2])))					# Background Color
+	myPalette.setColor(QPalette.Text, QColor(int(EditableTextColor[0]), int(EditableTextColor[1]), int(EditableTextColor[2])))
+	myPalette.setColor(QPalette.Button, QColor(int(ButtonColor[0]), int(ButtonColor[1]), int(ButtonColor[2])))			# Button Color
+	myPalette.setColor(QPalette.ButtonText, QColor(int(ButtonTextColor[0]), int(ButtonTextColor[1]), int(ButtonTextColor[2])))
+	myPalette.setColor(QPalette.Link, QColor(int(LinkColor[0]), int(LinkColor[1]), int(LinkColor[2])))
+	myPalette.setColor(QPalette.Highlight, QColor(int(SliderColor[0]), int(SliderColor[1]), int(SliderColor[2])))			# Slider Top Color
+	
+	app.setStyle(QStyleFactory.create(ThemeName))
+	app.setPalette(myPalette)
+	app.setStyleSheet("QToolTip {color: rgb(%d, %d, %d); background-color: rgb(%d, %d, %d); border: 1px solid grey;}" % (int(ToolTipTextColor[0]), int(ToolTipTextColor[1]), int(ToolTipTextColor[2]),
+																														 int(ToolTipBaseColor[0]), int(ToolTipBaseColor[1]), int(ToolTipBaseColor[2])))
 
 x = 0
 cmd('mode 60,20')
@@ -93,7 +93,6 @@ def status():
 		return 0
 	else :
 		return 6
-
 
 def warning(tme):
 	print('Toast !')
@@ -122,7 +121,6 @@ def fix1f():
 	elif status() == 6 :
 		print('SOMETHING WENT WRONG...')
 
-
 def fix2f():
 	print('Applying Store Fix....')
 	try :
@@ -130,7 +128,6 @@ def fix2f():
 		print('\33[32mPLEASE RESTART YOUR PC FOR CHANGES TO TAKE EFFECT !')
 	except :
 		print('\33[36mTRY RUNNING BLAUNCHER AS ADMINISTRATOR !')
-
 
 def tamer(self, tame1, tame2):
 	global x
@@ -153,7 +150,7 @@ def tamer(self, tame1, tame2):
 		time.sleep(30)
 		print('killing...!')
 
-		
+
 class MainWindow(QMainWindow, gui_main.Ui_window):
 	def __init__(self):
 		super(MainWindow, self).__init__()
@@ -178,28 +175,31 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 		self.comboBox.activated[str].connect(self.setTheme)
 
 		self.DISCORD.clicked.connect(lambda: cmd('start https://discord.gg/5pkSfFF'))
-		self.YOUTUBE.clicked.connect(lambda: cmd('start https://youtube.com/TechArchives45?sub_confirmation=1'))
+		self.YOUTUBE.clicked.connect(lambda: cmd('start https://youtube.com/frakod?sub_confirmation=1'))
 
 		if path.isfile('settings.ini'):					# Load last used values if exist
-
+			global cur_thm
 			s1_val = int(settings['SLIDERS']['S1'])			# Needed to do this due to some unknown bug,
 			s2_val = int(settings['SLIDERS']['S2'])			# else i could have put the values directly.
-			nf_ag = eval(settings['EXTRAS']['NF_AG'])
-			nf_val = int(settings['EXTRAS']['NF_DUR'])
-
+			nf_ag = eval(settings['EXTRAS']['NOTIF_AGREE'])
+			nf_dur = int(settings['EXTRAS']['NOTIF_DURATION'])
+			cur_thm = str(settings['EXTRAS']['CURRENT_THEME'])
+			
 			self.slider1.setValue(s1_val)
 			self.slider2.setValue(s2_val)
 			self.notif_agree.setChecked(nf_ag)
-			self.notif_duration.setValue(nf_val)
+			self.notif_duration.setValue(nf_dur)
+			self.comboBox.setCurrentText(cur_thm)
 
 		self.show()
 
 	def closeEvent(self, event):						# Will also stop the killer
 		self.stopf()
-		event.accept()
+		#event.accept()
 
-	def setTheme(self, selection):
-		print('Setting Theme to '+ selection)
+	def setTheme(self, tname):
+		setTheme2(self, tname)
+		self.savef()
 
 	def resizeWindow(self):
 		WinPosX = self.geometry().x()
@@ -236,7 +236,9 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 	# save current values
 	def savef(self):
 		settings['SLIDERS'] = {'S1': self.slider1.value(), 'S2': self.slider2.value()}
-		settings['EXTRAS'] = {'NF_AG': self.notif_agree.isChecked(), 'NF_DUR': self.notif_duration.value()}
+		settings['EXTRAS'] = {'NOTIF_AGREE': self.notif_agree.isChecked(),
+							  'NOTIF_DURATION': self.notif_duration.value(),
+							  'CURRENT_THEME': self.comboBox.currentText()}
 
 		#print(settings['EXTRAS']['NF_AG'], settings['EXTRAS']['NF_DUR'])
 		with open('settings.ini', 'w') as configfile :
@@ -260,6 +262,7 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 			except :
 				print('OOPS SOMETHING WENT WRONG...')
 				print('TRY RUNNING BLAUNCHER AS ADMINISTRATOR !')
+
 	def stopf(self):
 		global x
 		if x == 1:
@@ -286,22 +289,7 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 if __name__ == '__main__':
 
 	app = QApplication([])									# Creating Main Window
-	app.setStyle(QStyleFactory.create(ThemeName))			# Setting Theme
-
-	# Creating Dark Palette
-	darkPalette = QPalette()
-	darkPalette.setColor(QPalette.Window, QColor(int(BgColor[0]), int(BgColor[1]), int(BgColor[2])))
-	darkPalette.setColor(QPalette.WindowText, QColor(int(TextColor[0]), int(TextColor[1]), int(TextColor[2])))
-	darkPalette.setColor(QPalette.Base, QColor(int(BaseColor[0]), int(BaseColor[1]), int(BaseColor[2])))					# Background Color
-	darkPalette.setColor(QPalette.Text, QColor(int(EditableTextColor[0]), int(EditableTextColor[1]), int(EditableTextColor[2])))
-	darkPalette.setColor(QPalette.Button, QColor(int(ButtonColor[0]), int(ButtonColor[1]), int(ButtonColor[2])))			# Button Color
-	darkPalette.setColor(QPalette.ButtonText, QColor(int(ButtonTextColor[0]), int(ButtonTextColor[1]), int(ButtonTextColor[2])))
-	darkPalette.setColor(QPalette.Link, QColor(int(LinkColor[0]), int(LinkColor[1]), int(LinkColor[2])))
-	darkPalette.setColor(QPalette.Highlight, QColor(int(SliderColor[0]), int(SliderColor[1]), int(SliderColor[2])))			# Slider Top Color
-	
-	app.setPalette(darkPalette)
-	app.setStyleSheet("QToolTip {color: rgb(%d, %d, %d); background-color: rgb(%d, %d, %d); border: 1px solid grey;}" % (int(ToolTipTextColor[0]), int(ToolTipTextColor[1]), int(ToolTipTextColor[2]),
-															     int(ToolTipBaseColor[0]), int(ToolTipBaseColor[1]), int(ToolTipBaseColor[2])))
+	setTheme2(app, cur_thm)
+	#setTheme2(app, 'Red Magic')
 	window = MainWindow()
-	#window.show()
 	sys.exit(app.exec_())		 # Starting Gui Loop
