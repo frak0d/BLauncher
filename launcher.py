@@ -178,19 +178,17 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 		self.YOUTUBE.clicked.connect(lambda: cmd('start https://youtube.com/frakod?sub_confirmation=1'))
 
 		if path.isfile('settings.ini'):					# Load last used values if exist
-			global cur_thm
 			s1_val = int(settings['SLIDERS']['S1'])			# Needed to do this due to some unknown bug,
 			s2_val = int(settings['SLIDERS']['S2'])			# else i could have put the values directly.
 			nf_ag = eval(settings['EXTRAS']['NOTIF_AGREE'])
 			nf_dur = int(settings['EXTRAS']['NOTIF_DURATION'])
-			cur_thm = str(settings['EXTRAS']['CURRENT_THEME'])
 			
 			self.slider1.setValue(s1_val)
 			self.slider2.setValue(s2_val)
 			self.notif_agree.setChecked(nf_ag)
 			self.notif_duration.setValue(nf_dur)
-			self.comboBox.setCurrentText(cur_thm)
-
+		
+		self.comboBox.setCurrentText(cur_thm)
 		self.show()
 
 	def closeEvent(self, event):						# Will also stop the killer
@@ -198,7 +196,7 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 		#event.accept()
 
 	def setTheme(self, tname):
-		setTheme2(self, tname)
+		setTheme2(QApplication.instance(), tname)
 		self.savef()
 
 	def resizeWindow(self):
@@ -290,6 +288,5 @@ if __name__ == '__main__':
 
 	app = QApplication([])									# Creating Main Window
 	setTheme2(app, cur_thm)
-	#setTheme2(app, 'Red Magic')
 	window = MainWindow()
 	sys.exit(app.exec_())		 # Starting Gui Loop
