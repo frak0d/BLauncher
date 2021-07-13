@@ -29,27 +29,51 @@ if path.isfile('settings.ini'):
 
 ThemeFolder = './themes/'
 ThemeList = []
+AuthorName = 'Unknown'
 
-# Creating Folder if Not Exists :-
+def RefreshThemeList():
+	ThemeList.clear()
+	# Scanning For .blt Files
+	if os.path.exists(ThemeFolder):
+		with os.scandir(ThemeFolder) as DirList:
+			for inputt in DirList:
+				if inputt.is_file() and inputt.name.endswith('.blt'):
+					ThemeList.append(inputt.name[:-4])
 
-if not os.path.exists(ThemeFolder):
-	os.makedirs(ThemeFolder)
-
-# Scanning For .blt Files :-
-
-with os.scandir(ThemeFolder) as DirList:
-	for inputt in DirList:
-		if inputt.is_file() and inputt.name.endswith('.blt'):
-			ThemeList.append(inputt.name[:-4])
+RefreshThemeList()
 
 def setTheme2(app, tname):
+	global ThemeInfo
+	ThemeFileName = ThemeFolder + tname + '.blt'
 
-	ThemeInfo.read(ThemeFolder + tname + '.blt')
-	print('Setting Theme to '+ tname)
+	if os.path.isfile(ThemeFileName):
+		print('Setting Theme to '+ tname)
+		ThemeInfo.read(ThemeFileName)
+	else:
+		ThemeInfo.read_string(
+'''
+[THEME]
+
+AuthorName = Mr. Kat
+themename = Fusion
+BgColor = (40,40,50)
+BaseColor = (25,25,25)
+ButtonColor = (50,50,200)
+ButtonTextColor = (255,255,255)
+SliderColor = (42,200,220)
+LinkColor = (42,130,218)
+TextColor = (255,255,255)
+EditableTextColor = (255,255,255)
+ToolTipBaseColor = (20,20,20)
+ToolTipTextColor = (255,255,255)
+''')
+		print('Theme Not Found, Setting Default Theme!')
 
 	THAMES = ThemeInfo['THEME']
 	ThemeName = THAMES['ThemeName']
 
+	global AuthorName
+	AuthorName = str(THAMES['AuthorName'])
 	BgColor = eval(THAMES['BgColor'])
 	BaseColor = eval(THAMES['BaseColor'])
 	ButtonColor = eval(THAMES['ButtonColor'])
@@ -96,7 +120,7 @@ def status():
 
 def warning(tme):
 	print('Toast !')
-	notify( AppName='BLauncher v1.18',
+	notify( AppName='BLauncher v1.19',
 			TitleText='Potential Crash Warning !',
 			BodyText='It is Recomended to Save any Unsaved Progress within 30 Seconds.',
 			ImagePath='./assets/warn.png')
@@ -171,6 +195,7 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 		self.notif_agree.stateChanged.connect(lambda: self.savef())
 		self.notif_duration.valueChanged.connect(lambda: self.savef())
 
+		self.auth_name.setText(AuthorName)
 		self.comboBox.addItems(ThemeList)
 		self.comboBox.activated[str].connect(self.setTheme)
 
@@ -196,7 +221,11 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 		#event.accept()
 
 	def setTheme(self, tname):
+		self.comboBox.clear()
+		RefreshThemeList()
+		self.comboBox.addItems(ThemeList)
 		setTheme2(QApplication.instance(), tname)
+		self.auth_name.setText(AuthorName)
 		self.savef()
 
 	def resizeWindow(self):
