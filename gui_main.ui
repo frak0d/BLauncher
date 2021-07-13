@@ -55,11 +55,11 @@
    </property>
    <property name="font">
     <font>
-     <family>Courgette</family>
+     <family>Comic Sans MS</family>
      <pointsize>25</pointsize>
-     <weight>75</weight>
+     <weight>50</weight>
      <italic>false</italic>
-     <bold>true</bold>
+     <bold>false</bold>
      <underline>false</underline>
      <strikeout>false</strikeout>
      <stylestrategy>PreferAntialias</stylestrategy>
@@ -251,10 +251,10 @@
      <number>5</number>
     </property>
     <property name="value">
-     <number>12</number>
+     <number>15</number>
     </property>
     <property name="sliderPosition">
-     <number>12</number>
+     <number>15</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -314,7 +314,7 @@
      <enum>QAbstractSpinBox::DefaultStepType</enum>
     </property>
     <property name="value">
-     <double>12.000000000000000</double>
+     <double>15.000000000000000</double>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
@@ -383,7 +383,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Use this button if your game crashes while playing.</string>
+     <string>More Options !</string>
     </property>
     <property name="text">
      <string>Options  &gt;&gt;</string>
@@ -429,9 +429,9 @@
   <widget class="QPushButton" name="fix2b">
    <property name="geometry">
     <rect>
-     <x>591</x>
+     <x>600</x>
      <y>120</y>
-     <width>115</width>
+     <width>125</width>
      <height>35</height>
     </rect>
    </property>
@@ -477,9 +477,9 @@
   <widget class="QPushButton" name="fix1b">
    <property name="geometry">
     <rect>
-     <x>466</x>
+     <x>465</x>
      <y>120</y>
-     <width>115</width>
+     <width>125</width>
      <height>35</height>
     </rect>
    </property>
@@ -507,7 +507,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>656</x>
+     <x>676</x>
      <y>200</y>
      <width>42</width>
      <height>22</height>
@@ -571,7 +571,7 @@
     </font>
    </property>
    <property name="text">
-    <string>• Notification Duration  (seconds)</string>
+    <string>• Notification Duration  (seconds) :</string>
    </property>
   </widget>
   <widget class="QPushButton" name="YOUTUBE">
@@ -689,15 +689,15 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>15</y>
+      <y>6</y>
       <width>125</width>
-      <height>30</height>
+      <height>90</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <family>Doppio One</family>
-      <pointsize>9</pointsize>
+      <pointsize>13</pointsize>
       <weight>75</weight>
       <bold>true</bold>
       <underline>false</underline>
@@ -712,7 +712,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
      <string extracomment="Visit BLauncher Website"/>
     </property>
     <property name="text">
-     <string notr="true">&lt;a href=&quot;https://techarchives.rf.gd&quot;&gt;&lt;span style=&quot; color:#ffff00;&quot;&gt;BLauncher v1.19&lt;/span&gt;&lt;/a&gt;</string>
+     <string notr="true">&lt;a href=&quot;https://techarchives.rf.gd&quot;&gt;&lt;span style=&quot; color:#ffff00;&quot;&gt;BLauncher&lt;br&gt;v1.19&lt;/span&gt;&lt;/a&gt;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -725,71 +725,6 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     </property>
     <property name="textInteractionFlags">
      <set>Qt::LinksAccessibleByMouse</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>42</y>
-      <width>125</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>BY</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_7">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>60</y>
-      <width>125</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>10</pointsize>
-      <weight>75</weight>
-      <italic>true</italic>
-      <bold>true</bold>
-      <stylestrategy>PreferAntialias</stylestrategy>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string notr="true" extracomment="Visit my YouTube Channel"/>
-    </property>
-    <property name="statusTip">
-     <string notr="true"/>
-    </property>
-    <property name="whatsThis">
-     <string notr="true"/>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::NoFrame</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Plain</enum>
-    </property>
-    <property name="text">
-     <string>&lt;a href=&quot;www.youtube.com/TechArchives45?sub_confirmation=1&quot;&gt;&lt;span style=&quot; color:#c8ff61;&quot;&gt;Tech Archives&lt;/span&gt;&lt;/a&gt;</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-    <property name="openExternalLinks">
-     <bool>true</bool>
     </property>
    </widget>
   </widget>
@@ -806,7 +741,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <enum>QFrame::Plain</enum>
    </property>
    <property name="text">
-    <string>• Select Theme :-</string>
+    <string>• Theme :</string>
    </property>
    <property name="textFormat">
     <enum>Qt::PlainText</enum>
@@ -821,7 +756,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
   <widget class="QComboBox" name="comboBox">
    <property name="geometry">
     <rect>
-     <x>608</x>
+     <x>600</x>
      <y>51</y>
      <width>121</width>
      <height>21</height>
@@ -832,7 +767,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
    <property name="geometry">
     <rect>
      <x>600</x>
-     <y>80</y>
+     <y>75</y>
      <width>51</width>
      <height>31</height>
     </rect>
@@ -841,7 +776,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <enum>QFrame::Plain</enum>
    </property>
    <property name="text">
-    <string>Author :</string>
+    <string>• Author :</string>
    </property>
    <property name="textFormat">
     <enum>Qt::PlainText</enum>
@@ -853,12 +788,12 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <number>1</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label_10">
+  <widget class="QLabel" name="auth_name">
    <property name="geometry">
     <rect>
      <x>650</x>
-     <y>80</y>
-     <width>91</width>
+     <y>75</y>
+     <width>90</width>
      <height>31</height>
     </rect>
    </property>
@@ -887,6 +822,11 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
      <height>21</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Read Instructions Before Use !</string>
    </property>
@@ -910,7 +850,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
   <zorder>label_8</zorder>
   <zorder>comboBox</zorder>
   <zorder>label_9</zorder>
-  <zorder>label_10</zorder>
+  <zorder>auth_name</zorder>
   <zorder>label_11</zorder>
  </widget>
  <tabstops>
