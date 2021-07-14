@@ -218,12 +218,12 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 
 	def closeEvent(self, event):						# Will also stop the killer
 		self.stopf()
-		#event.accept()
 
 	def setTheme(self, tname):
 		self.comboBox.clear()
 		RefreshThemeList()
 		self.comboBox.addItems(ThemeList)
+		self.comboBox.setCurrentText(tname)
 		setTheme2(QApplication.instance(), tname)
 		self.auth_name.setText(AuthorName)
 		self.savef()
@@ -314,7 +314,6 @@ class MainWindow(QMainWindow, gui_main.Ui_window):
 			sys.exit(1)
 
 if __name__ == '__main__':
-
 	app = QApplication([])									# Creating Main Window
 	setTheme2(app, cur_thm)
 	window = MainWindow()
