@@ -1,10 +1,12 @@
 #pragma once
 
 // Licence : Apache 2.0
+// Author  : Tanishq-Banyal
 // Source  : github.com/Tanishq-Banyal/nini
 
 #include <map>
 #include <string>
+#include <cstring>
 #include <cstdio>
 #include <cstdint>
 
@@ -15,14 +17,14 @@ namespace Util
 {
 	char* ltrim(char* s)
 	{
-		while(isspace(*s)) s++;
+        while(std::isspace(*s)) s++;
 		return s;
 	}
 	
 	char* rtrim(char* s)
 	{
-		char* back = s + strlen(s);
-		while(isspace(*--back));
+        char* back = s + std::strlen(s);
+        while(std::isspace(*--back));
 		*(back+1) = '\0';
 		return s;
 	}
@@ -111,9 +113,14 @@ public :
 		
 		std::fclose(fp); return true;
 	}
+
+	void clear()
+	{
+		sections.clear();
+	}
 	
-	File();
-	
+	File() = default;
+
 	File(const std::string& path) : fpath(path)
 	{
 		load(fpath);

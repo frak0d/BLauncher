@@ -1,7 +1,7 @@
 [THEME]
 
 AuthorName = 0603
-themename = Fusion
+ThemeName = Fusion
 BgColor = (0,15,22)
 BaseColor = (25,25,25)
 ButtonColor = (0,29,161)
