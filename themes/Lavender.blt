@@ -1,7 +1,7 @@
 [THEME]
 
 AuthorName = Mr. Kat
-themename = Fusion
+ThemeName = Fusion
 BgColor = (40,40,50)
 BaseColor = (25,25,25)
 ButtonColor = (50,50,200)
