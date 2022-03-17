@@ -43,7 +43,7 @@ private:
 	std::map<std::string, std::string> entries;
 	
 public :
-	std::string& operator [] (const std::string& key)
+	std::string& operator [] (const std::string& key) const
 	{
 		return entries[key];
 	}
