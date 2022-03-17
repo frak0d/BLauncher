@@ -3,7 +3,7 @@
 #include <chrono>
 #include <thread>
 
-struct SleepUtils
+struct
 {
 
 void sleep(int time_sec)

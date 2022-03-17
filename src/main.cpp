@@ -1,5 +1,7 @@
+#include <tuple>
 #include <string>
 #include <cstdlib>
+#include <stdint.h>
 #include <iostream>
 #include <filesystem>
 
@@ -12,6 +14,7 @@ using std::printf;
 #define elif else if
 typedef std::string str;
 namespace fs = std::filesystem;
+typedef std::tuple<uint8_t,uint8_t,uint8_t> color_triplet;
 
 bool KillerRunning = false;
 
@@ -28,6 +31,57 @@ void print2(const auto& ... args)
     (std::cout << ... << args) << std::endl;
 }
 */
+
+template <typename T>
+T str_to(const str& string)
+{
+    T temp;
+    std::stringstream ss;
+    ss << string;
+    ss >> temp;
+    return temp;
+}
+
+template
+color_triplet str_to<color_triplet>(const str& string)
+{
+    uint8_t R,G,B;
+    std::sscanf(string.c_str(), "(%u,%u,%u)", &R, &G, &B);
+    return {R,G,B};
+}
+
+void set_app_theme(QApplication& app, const Ini::Section& theme)
+{
+    printf("Setting Theme By %s\n", theme["AuthorName"].c_str());
+
+    auto BgColor           =  str_to<color_triplet>(theme["BgColor"]);
+    auto BaseColor         =  str_to<color_triplet>(theme["BaseColor"]);
+    auto ButtonColor       =  str_to<color_triplet>(theme["ButtonColor"]);
+    auto ButtonTextColor   =  str_to<color_triplet>(theme["ButtonTextColor"]);
+    auto SliderColor       =  str_to<color_triplet>(theme["SliderColor"]);
+    auto LinkColor         =  str_to<color_triplet>(theme["LinkColor"]);
+    auto TextColor         =  str_to<color_triplet>(theme["TextColor"]);
+    auto EditableTextColor =  str_to<color_triplet>(theme["EditableTextColor"]);
+    auto ToolTipBaseColor  =  str_to<color_triplet>(theme["ToolTipBaseColor"]);
+    auto ToolTipTextColor  =  str_to<color_triplet>(theme["ToolTipTextColor"]);
+    
+    myPalette = QPalette();  // Create Dark Palette
+/*
+    myPalette.setColor(QPalette.Window, QColor(int(BgColor[0]), int(BgColor[1]), int(BgColor[2])))
+    myPalette.setColor(QPalette.WindowText, QColor(int(TextColor[0]), int(TextColor[1]), int(TextColor[2])))
+    myPalette.setColor(QPalette.Base, QColor(int(BaseColor[0]), int(BaseColor[1]), int(BaseColor[2])))                  # Background Color
+    myPalette.setColor(QPalette.Text, QColor(int(EditableTextColor[0]), int(EditableTextColor[1]), int(EditableTextColor[2])))
+    myPalette.setColor(QPalette.Button, QColor(int(ButtonColor[0]), int(ButtonColor[1]), int(ButtonColor[2])))          # Button Color
+    myPalette.setColor(QPalette.ButtonText, QColor(int(ButtonTextColor[0]), int(ButtonTextColor[1]), int(ButtonTextColor[2])))
+    myPalette.setColor(QPalette.Link, QColor(int(LinkColor[0]), int(LinkColor[1]), int(LinkColor[2])))
+    myPalette.setColor(QPalette.Highlight, QColor(int(SliderColor[0]), int(SliderColor[1]), int(SliderColor[2])))           # Slider Top Color
+*/
+    app.setStyle(QStyleFactory.create(theme["ThemeName"].c_str()));
+    app.setPalette(myPalette);
+    
+    //app.setStyleSheet("QToolTip {color: rgb(%d, %d, %d); background-color: rgb(%d, %d, %d); border: 1px solid grey;}" % (int(ToolTipTextColor[0]), int(ToolTipTextColor[1]), int(ToolTipTextColor[2]),
+    //                                                                                                                     int(ToolTipBaseColor[0]), int(ToolTipBaseColor[1]), int(ToolTipBaseColor[2])));
+}
 
 bool cmd(const str& cmd)
 {
@@ -207,20 +261,21 @@ int main(int argc, char* argv[])
             theme.load(("themes/"+ThemeName+".blt").toStdString());
             auto THEME = theme["THEME"];
             ui.auth_name->setText(THEME["AuthorName"].c_str());
+
+            set_app_theme(app, THEME);
         });
-/*
-        if path.isfile('settings.ini'):         # Load last used values if exist
-            s1_val = int(settings['SLIDERS']['S1'])     # Needed to do this due to some unknown bug,
-            s2_val = int(settings['SLIDERS']['S2'])     # else i could have put the values directly.
-            nf_ag = eval(settings['EXTRAS']['NOTIF_AGREE'])
-            nf_dur = int(settings['EXTRAS']['NOTIF_DURATION'])
-            
-            self.slider1.setValue(s1_val)
-            self.slider2.setValue(s2_val)
-            self.notif_agree.setChecked(nf_ag)
-            self.notif_duration.setValue(nf_dur)
-        
-        self.comboBox.setCurrentText(cur_thm)*/
+
+        // Loading last used values
+        if (fs::exists("settings.ini"))
+        {
+            Ini::File cfg("settings.ini");
+
+            ui.slider1->setValue(str_to<int>(cfg["SLIDERS"]["S1"]));
+            ui.slider2->setValue(str_to<int>(cfg["SLIDERS"]["S2"]));
+            ui.notif_agree->setChecked(str_to<bool>(cfg["EXTRAS"]["NOTIF_AGREE"]));
+            ui.notif_duration->setValue(str_to<int>(cfg["EXTRAS"]["NOTIF_DURATION"]));
+            ui.comboBox->setCurrentText(cfg["EXTRAS"]["CURRENT_THEME"].c_str());
+        }
 
         win.show();
         return app.exec();
