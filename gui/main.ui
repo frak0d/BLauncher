@@ -56,6 +56,7 @@
    <property name="font">
     <font>
      <pointsize>25</pointsize>
+     <weight>50</weight>
      <italic>false</italic>
      <bold>false</bold>
      <underline>false</underline>
@@ -141,6 +142,7 @@
     <property name="font">
      <font>
       <pointsize>10</pointsize>
+      <weight>50</weight>
       <bold>false</bold>
       <stylestrategy>PreferAntialias</stylestrategy>
      </font>
@@ -191,6 +193,7 @@
     <property name="font">
      <font>
       <pointsize>12</pointsize>
+      <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
       <underline>false</underline>
@@ -273,6 +276,7 @@
     <property name="font">
      <font>
       <pointsize>10</pointsize>
+      <weight>50</weight>
       <bold>false</bold>
       <stylestrategy>PreferAntialias</stylestrategy>
      </font>
@@ -323,6 +327,7 @@
     <property name="font">
      <font>
       <pointsize>12</pointsize>
+      <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
       <underline>false</underline>
@@ -689,6 +694,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <property name="font">
      <font>
       <pointsize>13</pointsize>
+      <weight>75</weight>
       <bold>true</bold>
       <underline>false</underline>
       <stylestrategy>PreferAntialias</stylestrategy>
@@ -702,7 +708,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
      <string extracomment="Visit BLauncher Website"/>
     </property>
     <property name="text">
-     <string notr="true">&lt;a href=&quot;https://techarchives.rf.gd&quot;&gt;&lt;span style=&quot; color:#ffff00;&quot;&gt;BLauncher&lt;br&gt;v1.19&lt;/span&gt;&lt;/a&gt;</string>
+     <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://techarchives.rf.gd&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#ffff00;&quot;&gt;BLauncher&lt;br/&gt;v2.0&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -723,8 +729,8 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <rect>
      <x>600</x>
      <y>20</y>
-     <width>111</width>
-     <height>31</height>
+     <width>60</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="frameShadow">
@@ -758,8 +764,8 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <rect>
      <x>600</x>
      <y>75</y>
-     <width>51</width>
-     <height>31</height>
+     <width>56</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="frameShadow">

@@ -10,18 +10,17 @@
 
 #include <ui_main.h>
 
+#include <QtGui>
+#include <QtCore>
+#include <QtWidgets>
+
 using std::printf;
 #define elif else if
 typedef std::string str;
 namespace fs = std::filesystem;
-typedef std::tuple<uint8_t,uint8_t,uint8_t> color_triplet;
 
 bool KillerRunning = false;
 
-str StopCommand  = R"FucK(Reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ClipSVC\Parameters" /v "ServiceDll" /t REG_EXPAND_SZ /d "%%SystemRoot%%\System32\ClipSVC.dll" /f)FucK";
-str StartCommand = R"FucK(Reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ClipSVC\Parameters" /v "ServiceDll" /t REG_EXPAND_SZ /d "%%SystemRoot%%\System32\ClipSBC.dll" /f)FucK";
-
-/* C++20 not yet supported by qt creator
 void print(const auto& ... args)
 {
     (std::cout << ... << args);
@@ -30,7 +29,6 @@ void print2(const auto& ... args)
 {
     (std::cout << ... << args) << std::endl;
 }
-*/
 
 template <typename T>
 T str_to(const str& string)
@@ -42,45 +40,37 @@ T str_to(const str& string)
     return temp;
 }
 
-template
-color_triplet str_to<color_triplet>(const str& string)
+template <>
+QColor str_to(const str& string)
 {
-    uint8_t R,G,B;
+    uint R,G,B;
     std::sscanf(string.c_str(), "(%u,%u,%u)", &R, &G, &B);
     return {R,G,B};
 }
 
-void set_app_theme(QApplication& app, const Ini::Section& theme)
+void set_app_theme(QApplication& app, Ini::Section& theme)
 {
-    printf("Setting Theme By %s\n", theme["AuthorName"].c_str());
+    app.setStyle(QStyleFactory::create(theme["ThemeName"].c_str()));
 
-    auto BgColor           =  str_to<color_triplet>(theme["BgColor"]);
-    auto BaseColor         =  str_to<color_triplet>(theme["BaseColor"]);
-    auto ButtonColor       =  str_to<color_triplet>(theme["ButtonColor"]);
-    auto ButtonTextColor   =  str_to<color_triplet>(theme["ButtonTextColor"]);
-    auto SliderColor       =  str_to<color_triplet>(theme["SliderColor"]);
-    auto LinkColor         =  str_to<color_triplet>(theme["LinkColor"]);
-    auto TextColor         =  str_to<color_triplet>(theme["TextColor"]);
-    auto EditableTextColor =  str_to<color_triplet>(theme["EditableTextColor"]);
-    auto ToolTipBaseColor  =  str_to<color_triplet>(theme["ToolTipBaseColor"]);
-    auto ToolTipTextColor  =  str_to<color_triplet>(theme["ToolTipTextColor"]);
-    
-    myPalette = QPalette();  // Create Dark Palette
-/*
-    myPalette.setColor(QPalette.Window, QColor(int(BgColor[0]), int(BgColor[1]), int(BgColor[2])))
-    myPalette.setColor(QPalette.WindowText, QColor(int(TextColor[0]), int(TextColor[1]), int(TextColor[2])))
-    myPalette.setColor(QPalette.Base, QColor(int(BaseColor[0]), int(BaseColor[1]), int(BaseColor[2])))                  # Background Color
-    myPalette.setColor(QPalette.Text, QColor(int(EditableTextColor[0]), int(EditableTextColor[1]), int(EditableTextColor[2])))
-    myPalette.setColor(QPalette.Button, QColor(int(ButtonColor[0]), int(ButtonColor[1]), int(ButtonColor[2])))          # Button Color
-    myPalette.setColor(QPalette.ButtonText, QColor(int(ButtonTextColor[0]), int(ButtonTextColor[1]), int(ButtonTextColor[2])))
-    myPalette.setColor(QPalette.Link, QColor(int(LinkColor[0]), int(LinkColor[1]), int(LinkColor[2])))
-    myPalette.setColor(QPalette.Highlight, QColor(int(SliderColor[0]), int(SliderColor[1]), int(SliderColor[2])))           # Slider Top Color
-*/
-    app.setStyle(QStyleFactory.create(theme["ThemeName"].c_str()));
+    auto myPalette = QPalette();  // Create Dark Palette
+    myPalette.setColor(QPalette::Window,     str_to<QColor>(theme["BgColor"]));
+    myPalette.setColor(QPalette::WindowText, str_to<QColor>(theme["TextColor"]));
+    myPalette.setColor(QPalette::Base,       str_to<QColor>(theme["BaseColor"]));
+    myPalette.setColor(QPalette::Text,       str_to<QColor>(theme["EditableTextColor"]));
+    myPalette.setColor(QPalette::Button,     str_to<QColor>(theme["ButtonColor"]));
+    myPalette.setColor(QPalette::ButtonText, str_to<QColor>(theme["ButtonTextColor"]));
+    myPalette.setColor(QPalette::Link,       str_to<QColor>(theme["LinkColor"]));
+    myPalette.setColor(QPalette::Highlight,  str_to<QColor>(theme["SliderColor"]));
     app.setPalette(myPalette);
     
-    //app.setStyleSheet("QToolTip {color: rgb(%d, %d, %d); background-color: rgb(%d, %d, %d); border: 1px solid grey;}" % (int(ToolTipTextColor[0]), int(ToolTipTextColor[1]), int(ToolTipTextColor[2]),
-    //                                                                                                                     int(ToolTipBaseColor[0]), int(ToolTipBaseColor[1]), int(ToolTipBaseColor[2])));
+    char stylesheet[1024]  =  "";
+    auto ToolTipBaseColor  =  str_to<QColor>(theme["ToolTipBaseColor"]);
+    auto ToolTipTextColor  =  str_to<QColor>(theme["ToolTipTextColor"]);
+
+    std::snprintf(stylesheet, sizeof(stylesheet), "QToolTip {color: rgb(%d, %d, %d); background-color: rgb(%d, %d, %d); border: 1px solid grey;}",
+        ToolTipTextColor.red(), ToolTipTextColor.green(), ToolTipTextColor.blue(), ToolTipTextColor.red(), ToolTipTextColor.green(), ToolTipTextColor.blue());
+
+    app.setStyleSheet(stylesheet);
 }
 
 bool cmd(const str& cmd)
@@ -92,6 +82,18 @@ bool cmd(const str& cmd)
 str cmd2(const str& cmd)
 {
     return "work in progress";
+}
+
+void haxx_on()
+{
+    cmd(R"FucK(Reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ClipSVC\Parameters" /v "ServiceDll" /t REG_EXPAND_SZ /d "%%SystemRoot%%\System32\ClipSBC.dll" /f)FucK");
+    cmd(R"FucK(net stop "ClipSVC")FucK");
+}
+
+void haxx_off()
+{
+    cmd(R"FucK(Reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ClipSVC\Parameters" /v "ServiceDll" /t REG_EXPAND_SZ /d "%%SystemRoot%%\System32\ClipSVC.dll" /f)FucK");
+    cmd(R"FucK(net start "ClipSVC")FucK");
 }
 
 int status()
@@ -142,7 +144,7 @@ void fix2f()
         printf("\x1b[32mPLEASE RESTART YOUR PC FOR CHANGES TO TAKE EFFECT !\n");
     }
     catch (...) {
-            printf("\x1b[36mTRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n");
+        printf("\x1b[36mTRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n");
     }
 }
 
@@ -161,8 +163,8 @@ void tamer(uint tame1, uint tame2)
                     printf("KILLED !\n");
                 }
                 catch (...) {
-                        printf("\nOOPS SOMETHING WENT WRONG...\n");
-                        printf("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n");
+                    printf("\nOOPS SOMETHING WENT WRONG...\n");
+                    printf("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n");
                 }
         }
 
@@ -182,12 +184,65 @@ int main(int argc, char* argv[])
 
         auto savef = [&]()
         {
-            puts("savef"); fflush(stdout);
+            Ini::File cfg("settings.ini");
+
+            cfg["SLIDERS"]["S1"]            = std::to_string( ui.slider1        -> value()     );
+            cfg["SLIDERS"]["S2"]            = std::to_string( ui.slider2        -> value()     );
+            cfg["EXTRAS"]["NOTIF_AGREE"]    = std::to_string( ui.notif_agree    -> isChecked() );
+            cfg["EXTRAS"]["NOTIF_DURATION"] = std::to_string( ui.notif_duration -> value()     );
+            cfg["EXTRAS"]["CURRENT_THEME"]  = ui.comboBox -> currentText().toStdString();
         };
 
         auto startf = [&]()
         {
-            puts("startf"); fflush(stdout);
+            if (KillerRunning)
+            {
+                print("\n\33[33mKiller is Already Active !");
+            }
+            else
+            {
+                print("\n\33[32mInitiating Startup....\n");
+                auto tame1 = ui.slider1->value();
+                auto tame2 = ui.slider2->value() * 60;
+
+                try {
+                    haxx_on();
+                    cmd("explorer.exe shell:AppsFolder/Microsoft.MinecraftUWP_8wekyb3d8bbwe!App");
+                    auto killer = std::thread(tamer, tame1, tame2);
+                    killer.detach();
+                }
+                catch (...) {
+                    print('OOPS SOMETHING WENT WRONG...');
+                    print('TRY RUNNING BLAUNCHER AS ADMINISTRATOR !');
+                }
+            }
+        };
+
+        auto stopf = [&]()
+        {
+            if (KillerRunning)
+            {
+                print('\nStopping Killer....');
+                try {
+                    haxx_off();
+                    print('\nKiller Stopped !');
+                    print('\n\33[31mEXITING PROGRAM....');
+                    tim.sleep(0.2);
+                    std::exit(1);
+                }
+                catch (...) {
+                    print('\n\33[33mOOPS SOMETHING WENT WRONG...');
+                    print('\n\33[33mEXITING PROGRAM....');
+                    tim.sleep(2);
+                    std::exit(0);
+                }
+            }
+            else
+            {
+                print('\n\33[31mEXITING PROGRAM....');
+                tim.sleep(0.2);
+                std::exit(1);
+            }
         };
 
         auto expandf = [&]()
@@ -223,7 +278,10 @@ int main(int argc, char* argv[])
         QObject::connect(ui.startb,  &QPushButton::clicked, startf);
         QObject::connect(ui.optionb, &QPushButton::clicked, expandf);
 
+        QApplication::connect(&app, &QApplication::aboutToQuit, stopf);
+
         QObject::connect(ui.notif_agree, &QCheckBox::stateChanged, [&](int state){savef();});
+        QObject::connect(ui.comboBox, QOverload<int>::of(&QComboBox::activated), [&](int index){savef();});
         QObject::connect(ui.notif_duration, QOverload<int>::of(&QSpinBox::valueChanged), [&](int value){savef();});
 
         QObject::connect(ui.DISCORD, &QPushButton::clicked, [](){cmd("start https://discord.gg/5pkSfFF");});
@@ -268,13 +326,13 @@ int main(int argc, char* argv[])
         // Loading last used values
         if (fs::exists("settings.ini"))
         {
-            Ini::File cfg("settings.ini");
+            Ini::File cfg; cfg.load("settings.ini");
 
-            ui.slider1->setValue(str_to<int>(cfg["SLIDERS"]["S1"]));
-            ui.slider2->setValue(str_to<int>(cfg["SLIDERS"]["S2"]));
-            ui.notif_agree->setChecked(str_to<bool>(cfg["EXTRAS"]["NOTIF_AGREE"]));
-            ui.notif_duration->setValue(str_to<int>(cfg["EXTRAS"]["NOTIF_DURATION"]));
-            ui.comboBox->setCurrentText(cfg["EXTRAS"]["CURRENT_THEME"].c_str());
+            ui.slider1        -> setValue(str_to<int>(cfg["SLIDERS"]["S1"]));
+            ui.slider2        -> setValue(str_to<int>(cfg["SLIDERS"]["S2"]));
+            ui.notif_agree    -> setChecked(str_to<bool>(cfg["EXTRAS"]["NOTIF_AGREE"]));
+            ui.notif_duration -> setValue(str_to<int>(cfg["EXTRAS"]["NOTIF_DURATION"]));
+            ui.comboBox       -> setCurrentText(cfg["EXTRAS"]["CURRENT_THEME"].c_str());
         }
 
         win.show();
