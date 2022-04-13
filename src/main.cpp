@@ -1,11 +1,13 @@
 #include <tuple>
 #include <string>
 #include <cstdlib>
-#include <stdint.h>
+#include <cstdint>
+#include <sstream>
 #include <iostream>
 #include <filesystem>
 
-#include "time.hpp"
+#include "sleep.cpp"
+#include "colors.cpp"
 #include "libs/nini.hpp"
 
 #include <ui_main.h>
@@ -16,16 +18,17 @@
 
 using std::printf;
 #define elif else if
-typedef std::string str;
+using str = std::string;
+using namespace std::literals;
 namespace fs = std::filesystem;
 
 bool KillerRunning = false;
 
 void print(const auto& ... args)
 {
-    (std::cout << ... << args);
+    (std::cout << ... << args) << std::flush;
 }
-void print2(const auto& ... args)
+void println(const auto& ... args)
 {
     (std::cout << ... << args) << std::endl;
 }
@@ -43,7 +46,7 @@ T str_to(const str& string)
 template <>
 QColor str_to(const str& string)
 {
-    uint R,G,B;
+    int R,G,B;
     std::sscanf(string.c_str(), "(%u,%u,%u)", &R, &G, &B);
     return {R,G,B};
 }
@@ -133,7 +136,10 @@ void fix1f()
                       : printf("Failed\n");
     }
     elif (status() == 6)
+    {
         printf("SOMETHING WENT WRONG...\n");
+    }
+    fflush(stdout);
 }
 
 void fix2f()
@@ -141,38 +147,36 @@ void fix2f()
     printf("Applying Store Fix....\n");
     try {
         cmd2(R"FucK(reg import "./assets/Fix_SVC.reg")FucK");
-        printf("\x1b[32mPLEASE RESTART YOUR PC FOR CHANGES TO TAKE EFFECT !\n");
+        print("PLEASE RESTART YOUR PC FOR CHANGES TO TAKE EFFECT !\n"_bldgrn);
     }
     catch (...) {
-        printf("\x1b[36mTRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n");
+        print("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n"_bldred);
     }
+    fflush(stdout);
 }
 
 void tamer(uint tame1, uint tame2)
 {
         KillerRunning = true;
-        printf("Time 1 = %u seconds\n", tame1);
-        printf("Time 2 = %u seconds\n", tame2);
-        tim.sleep(tame1);
+        sleep_for(tame1, "s");
 
         while (true)
         {
-                try {
-                    cmd2("taskkill /f /im ClipSVC.exe");
-                    cmd2("taskkill /f /im RuntimeBroker.exe");
-                    printf("KILLED !\n");
-                }
-                catch (...) {
-                    printf("\nOOPS SOMETHING WENT WRONG...\n");
-                    printf("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n");
-                }
-        }
+            try {
+                cmd2("taskkill /f /im ClipSVC.exe");
+                cmd2("taskkill /f /im RuntimeBroker.exe");
+                printf("DEATH NOTE ISSUED SUCCESSFULLY !\n");
+            }
+            catch (...) {
+                print("\nOOPS SOMETHING WENT WRONG...\n"_red);
+                print("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n"_bldred);
+            }
 
-        tim.sleep(tame2 - 30);
-        //if (self.notif_agree.isChecked())
-        //    warning(self.notif_duration.value());
-        tim.sleep(30);
-        printf("killing...!\n");
+            sleep_for(tame2-30, "s");
+            //if (self.notif_agree.isChecked())
+            //    warning(self.notif_duration.value());
+            sleep_for(30, "s");
+        }
 }
 
 int main(int argc, char* argv[])
@@ -197,13 +201,14 @@ int main(int argc, char* argv[])
         {
             if (KillerRunning)
             {
-                print("\n\33[33mKiller is Already Active !");
+                print("\nKiller is Already Active !"_cyn);
             }
             else
             {
-                print("\n\33[32mInitiating Startup....\n");
-                auto tame1 = ui.slider1->value();
-                auto tame2 = ui.slider2->value() * 60;
+                print("\nInitiating Startup....\n"_grn);
+
+                uint tame1 = ui.slider1->value() * 1;
+                uint tame2 = ui.slider2->value() * 60;
 
                 try {
                     haxx_on();
@@ -212,8 +217,8 @@ int main(int argc, char* argv[])
                     killer.detach();
                 }
                 catch (...) {
-                    print('OOPS SOMETHING WENT WRONG...');
-                    print('TRY RUNNING BLAUNCHER AS ADMINISTRATOR !');
+                    println("OOPS SOMETHING WENT WRONG..."_red);
+                    println("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !"_bldred);
                 }
             }
         };
@@ -222,25 +227,25 @@ int main(int argc, char* argv[])
         {
             if (KillerRunning)
             {
-                print('\nStopping Killer....');
+                print("\nStopping Killer....");
                 try {
                     haxx_off();
-                    print('\nKiller Stopped !');
-                    print('\n\33[31mEXITING PROGRAM....');
-                    tim.sleep(0.2);
+                    print("\nKiller Stopped !"_cyn);
+                    print("\n\x1b[31mEXITING PROGRAM...."_bldcyn);
+                    sleep_for(0.2, "s");
                     std::exit(1);
                 }
                 catch (...) {
-                    print('\n\33[33mOOPS SOMETHING WENT WRONG...');
-                    print('\n\33[33mEXITING PROGRAM....');
-                    tim.sleep(2);
+                    print("\nOOPS SOMETHING WENT WRONG..."_red);
+                    print("\nEXITING PROGRAM...."_bldred);
+                    sleep_for(2.0, "s");
                     std::exit(0);
                 }
             }
             else
             {
-                print('\n\33[31mEXITING PROGRAM....');
-                tim.sleep(0.2);
+                print("\nEXITING PROGRAM....\n"_bldcyn);
+                sleep_for(0.2, "s");
                 std::exit(1);
             }
         };
@@ -260,14 +265,14 @@ int main(int argc, char* argv[])
                 ui.optionb->setText("Options  >>");
             }
 
-            int time = 1;
+            float time = 0.4;
             int fps = 60;
-            int frames = fps*time;
+            int frames = fps * time;
             int fak = (TargetWidth - win.width()) / frames;
 
             for (int i=0 ; i < frames ; ++i)
             {
-                tim.msleep(1000/fps);
+                sleep_for(time/fps, "s");
                 win.resize(win.width()+fak*i, win.height());
             }
         };
