@@ -1,7 +1,7 @@
 project('BLauncher', 'cpp', version: '2.0',
         subproject_dir: 'libs', meson_version: '>=0.60',
         default_options: ['buildtype=release', 'strip=true',
-                          'b_lto=true', 'b_lto_mode=thin',
+                          'b_lto=true', 'cpp_rtti=false',
                           'warning_level=3', 'cpp_std=c++20'])
 
 qt5 = import('qt5')
@@ -9,7 +9,7 @@ gui = qt5.compile_ui(sources: ['gui/main.ui'])
 
 deps = [
     dependency('threads'),
-    dependency('qt5', modules: ['Core','Gui','Widgets'])
+    dependency('qt5', version: '>=5.9', modules: ['Core','Gui','Widgets'])
 ]
 
 dir_base = meson.current_source_dir()
@@ -28,4 +28,7 @@ executable('BLauncher', 'src/main.cpp', gui,
            dependencies: deps,
            install: true,
            install_dir: dir_install,
-           override_options: [])
+           cpp_args: ['-Wno-error',
+                      '-Wno-unused-variable',
+                      '-Wno-unused-parameter',
+                      '-Wno-ignored-attributes'])
