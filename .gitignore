@@ -1,4 +1,6 @@
-tmp/
 build/
+build_output/
+
+.cache/
 .vscode/
 settings.ini

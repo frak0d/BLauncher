@@ -144,7 +144,7 @@ void fix1f()
 
 void fix2f()
 {
-    printf("Applying Store Fix....\n");
+    print("Applying Store Fix....\n");
     try {
         cmd2(R"FucK(reg import "./assets/Fix_SVC.reg")FucK");
         print("PLEASE RESTART YOUR PC FOR CHANGES TO TAKE EFFECT !\n"_bldgrn);
@@ -165,7 +165,7 @@ void tamer(uint tame1, uint tame2)
             try {
                 cmd2("taskkill /f /im ClipSVC.exe");
                 cmd2("taskkill /f /im RuntimeBroker.exe");
-                printf("DEATH NOTE ISSUED SUCCESSFULLY !\n");
+                print("DEATH NOTE ISSUED SUCCESSFULLY !\n");
             }
             catch (...) {
                 print("\nOOPS SOMETHING WENT WRONG...\n"_red);
@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
                 try {
                     haxx_off();
                     print("\nKiller Stopped !"_cyn);
-                    print("\n\x1b[31mEXITING PROGRAM...."_bldcyn);
+                    print("\nEXITING PROGRAM...."_bldcyn);
                     sleep_for(0.2, "s");
                     std::exit(1);
                 }
