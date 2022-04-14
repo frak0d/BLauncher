@@ -22,7 +22,10 @@ install_subdir('assets', strip_directory: true,
 install_subdir('themes', strip_directory: true,
                install_dir: dir_install/'themes')
 
-executable('BLauncher_v'+meson.project_version(),
+exe_name = 'BLauncher_v' + meson.project_version()
+
+bl_exe = executable(
+           exe_name,
            'src/main.cpp', gui,
            dependencies: deps,
            install: true,
@@ -31,3 +34,14 @@ executable('BLauncher_v'+meson.project_version(),
                       '-Wno-unused-variable',
                       '-Wno-unused-parameter',
                       '-Wno-ignored-attributes'])
+
+upx  = find_program('upx')
+echo = find_program('echo')
+
+if get_option('static')
+    run_target('compress', depends: bl_exe,
+    command: [upx, '-9', '--lzma', install_dir/exe_name])
+else
+    run_target('compress',
+    command: [echo, '\nERROR: UPX Compression requires a static Build (use -Dstatic=true flag)\n'])
+endif
