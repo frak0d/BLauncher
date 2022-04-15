@@ -10,7 +10,6 @@ gui = qt5.compile_ui(sources: ['gui/main.ui'])
 
 deps = [
     dependency('threads', static: get_option('static')),
-    dependency('boost', version: '>=1.78', static: get_option('static')),
     dependency('qt5', version: '>=5.15', modules: ['Core','Gui','Widgets'], static: get_option('static'))
 ]
 
@@ -30,8 +29,7 @@ bl_exe = executable(
            dependencies: deps,
            install: true,
            install_dir: dir_install,
-           cpp_args: ['-Wno-error',
-                      '-Wno-unused-variable',
+           cpp_args: ['-Wno-unused-variable',
                       '-Wno-unused-parameter',
                       '-Wno-ignored-attributes'])
 

@@ -11,7 +11,6 @@
 - upx
 - qt5
 - meson
-- boost.process
 
 ### Build Instructions :-
 1. First install `msys2` and switch to CLANG32 mode.

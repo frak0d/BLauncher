@@ -46,9 +46,9 @@ T str_to(const str& string)
 template <>
 QColor str_to(const str& string)
 {
-    int R,G,B;
+    uint R,G,B;
     std::sscanf(string.c_str(), "(%u,%u,%u)", &R, &G, &B);
-    return {R,G,B};
+    return QColor(R,G,B);
 }
 
 void set_app_theme(QApplication& app, Ini::Section& theme)
@@ -78,13 +78,25 @@ void set_app_theme(QApplication& app, Ini::Section& theme)
 
 bool cmd(const str& cmd)
 {
-    std::cout << cmd << std::endl;
-    return false;
+	QProcess sp;
+	sp.start(cmd.c_str(), QStringList());
+
+	if (sp.waitForFinished())
+		if (sp.exitStatus() == QProcess::NormalExit)
+			return true;
+	
+	return false;
 }
 
 str cmd2(const str& cmd)
 {
-    return "work in progress";
+	QProcess sp;
+	sp.start(cmd.c_str(), QStringList());
+	
+	if (sp.waitForFinished())
+		return sp.readAll().toStdString();
+	else
+    	throw sp.errorString().toStdString();
 }
 
 void haxx_on()
@@ -121,36 +133,36 @@ void fix1f()
 {
     if (status() == 1)
     {
-        printf("Enabling Crash Fix... ");
-        cmd2(R"FucK(powershell -Command "Disable-WindowsErrorReporting")FucK");
+        print("Enabling Crash Fix... ");
+        cmd(R"FucK(powershell -Command "Disable-WindowsErrorReporting")FucK");
         
-        status() == 0 ? printf("Success\n")
-                      : printf("Failed\n");
+        status() == 0 ? println("Success")
+                      : println("Failed");
     }
     elif (status() == 0)
     {
-        printf("Disabling Crash Fix... ");
-        cmd2(R"FucK(powershell -Command "Enable-WindowsErrorReporting")FucK");
+        print("Disabling Crash Fix... ");
+        cmd(R"FucK(powershell -Command "Enable-WindowsErrorReporting")FucK");
         
-        status() == 1 ? printf("Success\n")
-                      : printf("Failed\n");
+        status() == 1 ? println("Success")
+                      : println("Failed");
     }
     elif (status() == 6)
     {
-        printf("SOMETHING WENT WRONG...\n");
+        println("SOMETHING WENT WRONG...");
     }
     fflush(stdout);
 }
 
 void fix2f()
 {
-    print("Applying Store Fix....\n");
+    println("Applying Store Fix....");
     try {
         cmd2(R"FucK(reg import "./assets/Fix_SVC.reg")FucK");
-        print("PLEASE RESTART YOUR PC FOR CHANGES TO TAKE EFFECT !\n"_bldgrn);
+        println("PLEASE RESTART YOUR PC FOR CHANGES TO TAKE EFFECT !"_bldgrn);
     }
     catch (...) {
-        print("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n"_bldred);
+        println("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !"_bldred);
     }
     fflush(stdout);
 }
@@ -182,13 +194,15 @@ void tamer(uint tame1, uint tame2)
 int main(int argc, char* argv[])
 {
         QApplication app(argc, argv);
+        auto exe_path = QCoreApplication::applicationDirPath().toStdString();
+        std::cout << "app path = " << exe_path << std::endl;
         Ui::window ui;
         QWidget win;
         ui.setupUi(&win);
 
         auto savef = [&]()
         {
-            Ini::File cfg("settings.ini");
+            Ini::File cfg(exe_path+"/settings.ini");
 
             cfg["SLIDERS"]["S1"]            = std::to_string( ui.slider1        -> value()     );
             cfg["SLIDERS"]["S2"]            = std::to_string( ui.slider2        -> value()     );
@@ -227,17 +241,17 @@ int main(int argc, char* argv[])
         {
             if (KillerRunning)
             {
-                print("\nStopping Killer....");
+                print("\nStopping Killer....\n");
                 try {
                     haxx_off();
-                    print("\nKiller Stopped !"_cyn);
-                    print("\nEXITING PROGRAM...."_bldcyn);
+                    println("Killer Stopped !"_cyn);
+                    println("EXITING PROGRAM...."_bldcyn);
                     sleep_for(0.2, "s");
                     std::exit(1);
                 }
                 catch (...) {
-                    print("\nOOPS SOMETHING WENT WRONG..."_red);
-                    print("\nEXITING PROGRAM...."_bldred);
+                    println("OOPS SOMETHING WENT WRONG..."_red);
+                    println("EXITING PROGRAM...."_bldred);
                     sleep_for(2.0, "s");
                     std::exit(0);
                 }
@@ -252,29 +266,25 @@ int main(int argc, char* argv[])
 
         auto expandf = [&]()
         {
-            int TargetWidth = 0;
+            int TargetWidth;
 
-            if (win.width() == 460)
+            if (win.width() == win.minimumWidth())
             {
-                TargetWidth = 750;
+                TargetWidth = win.maximumWidth();
                 ui.optionb->setText("Options  <<");
             }
             else
             {
-                TargetWidth = 460;
+                TargetWidth = win.minimumWidth();
                 ui.optionb->setText("Options  >>");
-            }
-
-            float time = 0.4;
-            int fps = 60;
-            int frames = fps * time;
-            int fak = (TargetWidth - win.width()) / frames;
-
-            for (int i=0 ; i < frames ; ++i)
-            {
-                sleep_for(time/fps, "s");
-                win.resize(win.width()+fak*i, win.height());
-            }
+          	}
+            
+            QPropertyAnimation animation(&win, "geometry");
+            animation.setDuration(800);
+            //animation.setStartValue(QRect(win.x(), win.y(), win.width(), win.height()));
+            animation.setEndValue(QRect(win.x(), win.y(), TargetWidth, win.height()));
+            animation.setEasingCurve(QEasingCurve::OutCubic);
+            animation.start();
         };
 
         QObject::connect(ui.fix1b, &QPushButton::clicked, fix1f);
@@ -312,7 +322,7 @@ int main(int argc, char* argv[])
             ui.slider2->setValue(value); savef();
         });
 
-        for (auto& entry : fs::directory_iterator("themes"))
+        for (auto& entry : fs::directory_iterator(exe_path+"/themes"))
         {
             if (entry.is_regular_file() && entry.path().string().ends_with(".blt"))
                 ui.comboBox->addItem(entry.path().stem().string().c_str());
@@ -321,7 +331,7 @@ int main(int argc, char* argv[])
         QObject::connect(ui.comboBox, &QComboBox::currentTextChanged, [&](const QString& ThemeName)
         {
             Ini::File theme;
-            theme.load(("themes/"+ThemeName+".blt").toStdString());
+            theme.load(exe_path+"/themes/"+ThemeName.toStdString()+".blt");
             auto THEME = theme["THEME"];
             ui.auth_name->setText(THEME["AuthorName"].c_str());
 
@@ -329,9 +339,9 @@ int main(int argc, char* argv[])
         });
 
         // Loading last used values
-        if (fs::exists("settings.ini"))
+        if (fs::exists(exe_path+"/settings.ini"))
         {
-            Ini::File cfg; cfg.load("settings.ini");
+            Ini::File cfg; cfg.load(exe_path+"/settings.ini");
 
             ui.slider1        -> setValue(str_to<int>(cfg["SLIDERS"]["S1"]));
             ui.slider2        -> setValue(str_to<int>(cfg["SLIDERS"]["S2"]));
