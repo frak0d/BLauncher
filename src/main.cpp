@@ -1,3 +1,4 @@
+#include <ostream>
 #include <tuple>
 #include <string>
 #include <cstdlib>
@@ -78,25 +79,25 @@ void set_app_theme(QApplication& app, Ini::Section& theme)
 
 bool cmd(const str& cmd)
 {
-	QProcess sp;
-	sp.start(cmd.c_str(), QStringList());
+    QProcess sp;
+    sp.start(cmd.c_str(), QStringList());
 
-	if (sp.waitForFinished())
-		if (sp.exitStatus() == QProcess::NormalExit)
-			return true;
-	
-	return false;
+    if (sp.waitForFinished())
+        if (sp.exitStatus() == QProcess::NormalExit)
+            return true;
+    
+    return false;
 }
 
 str cmd2(const str& cmd)
 {
-	QProcess sp;
-	sp.start(cmd.c_str(), QStringList());
-	
-	if (sp.waitForFinished())
-		return sp.readAll().toStdString();
-	else
-    	throw sp.errorString().toStdString();
+    QProcess sp;
+    sp.start(cmd.c_str(), QStringList());
+    
+    if (sp.waitForFinished())
+        return sp.readAll().toStdString();
+    else
+        throw sp.errorString().toStdString();
 }
 
 void haxx_on()
@@ -114,6 +115,7 @@ void haxx_off()
 int status()
 {
     str s = cmd2(R"FucK(powershell -Command "Get-WindowsErrorReporting")FucK");
+    std::cout << s << std::endl;
     
     if   (s == "Enabled\r\n" ) return 1;
     elif (s == "Disabled\r\n") return 0;
@@ -129,7 +131,7 @@ void warning(int time)
                      ImagePath='./assets/warn.png')*/
 }
 
-void fix1f()
+void crash_fix()
 {
     if (status() == 1)
     {
@@ -154,7 +156,7 @@ void fix1f()
     fflush(stdout);
 }
 
-void fix2f()
+void store_fix()
 {
     println("Applying Store Fix....");
     try {
@@ -277,18 +279,18 @@ int main(int argc, char* argv[])
             {
                 TargetWidth = win.minimumWidth();
                 ui.optionb->setText("Options  >>");
-          	}
+            }
             
             QPropertyAnimation animation(&win, "geometry");
-            animation.setDuration(800);
-            //animation.setStartValue(QRect(win.x(), win.y(), win.width(), win.height()));
+            animation.setDuration(1000);
+            animation.setStartValue(QRect(win.x(), win.y(), win.width(), win.height()));
             animation.setEndValue(QRect(win.x(), win.y(), TargetWidth, win.height()));
             animation.setEasingCurve(QEasingCurve::OutCubic);
             animation.start();
         };
 
-        QObject::connect(ui.fix1b, &QPushButton::clicked, fix1f);
-        QObject::connect(ui.fix2b, &QPushButton::clicked, fix2f);
+        QObject::connect(ui.fix1b, &QPushButton::clicked, crash_fix);
+        QObject::connect(ui.fix2b, &QPushButton::clicked, store_fix);
 
         QObject::connect(ui.startb,  &QPushButton::clicked, startf);
         QObject::connect(ui.optionb, &QPushButton::clicked, expandf);
