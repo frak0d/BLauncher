@@ -3,12 +3,15 @@
 // Licence : Apache 2.0
 // Author  : Tanishq-Banyal
 // Source  : github.com/Tanishq-Banyal/nini
+// Changes : Made More QT Friendly (at performance cost)
 
 #include <map>
 #include <string>
 #include <cstring>
 #include <cstdio>
 #include <cstdint>
+
+#include <QtCore/QString>
 
 namespace Ini
 {
@@ -40,10 +43,10 @@ class Section
 friend class File;
 
 private:
-	std::map<std::string, std::string> entries;
+	std::map<QString, QString> entries;
 	
 public :
-	std::string& operator [] (const std::string& key)
+	QString& operator [] (const QString& key)
 	{
 		return entries[key];
 	}
@@ -52,19 +55,19 @@ public :
 class File
 {
 private:
-	std::string fpath;
-	std::map<std::string, Section> sections;
+	QString fpath;
+	std::map<QString, Section> sections;
 	
 public :
-	Section& operator [] (const std::string& section)
+	Section& operator [] (const QString& section)
 	{
 		return sections[section];
 	}
 	
-	bool load(const std::string& path)
+	bool load(const QString& path)
 	{
 		Section* current_section;
-		FILE* fp = fopen(path.c_str(), "r");
+		FILE* fp = fopen(path.toStdString().c_str(), "r");
 		
 		if (!fp) return false;
 		
@@ -92,22 +95,22 @@ public :
 		std::fclose(fp); return true;
 	}
 	
-	bool save(const std::string& path)
+	bool save(const QString& path)
 	{
-		FILE* fp = fopen(path.c_str(), "w");
+		FILE* fp = fopen(path.toStdString().c_str(), "w");
 		if (!fp) return false;
 		
-		std::string line;
+		QString line;
 		
 		for (auto& [title, section] : sections)
 		{
 			line = "\n["+title+"]\n";
-			std::fprintf(fp, "%s\n", line.c_str());
+			std::fprintf(fp, "%s\n", line.toStdString().c_str());
 			
 			for (auto& [key, value] : section.entries)
 			{
 				line = key+" = "+value;
-				std::fprintf(fp, "%s\n", line.c_str());
+				std::fprintf(fp, "%s\n", line.toStdString().c_str());
 			}
 		}
 		
@@ -121,14 +124,14 @@ public :
 	
 	File() = default;
 
-	File(const std::string& path) : fpath(path)
+	File(const QString& path) : fpath(path)
 	{
 		load(fpath);
 	}
 	
 	~File()
 	{
-		if (!fpath.empty()) save(fpath);
+		if (!fpath.isEmpty()) save(fpath);
 	}
 };
 

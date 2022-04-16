@@ -1,103 +1,60 @@
-#include <ostream>
 #include <tuple>
 #include <string>
 #include <cstdlib>
 #include <cstdint>
 #include <sstream>
+#include <ostream>
 #include <iostream>
 #include <filesystem>
+#include <string_view>
 
+#include "cmd.cpp"
+#include "nini.cpp"
+#include "print.cpp"
 #include "sleep.cpp"
 #include "colors.cpp"
-#include "libs/nini.hpp"
+#include "str2color.cpp"
 
 #include <ui_main.h>
 
-#include <QtGui>
-#include <QtCore>
-#include <QtWidgets>
+#include <QtGui/QIcon>
+#include <QtGui/QPalette>
+#include <QtCore/QString>
+#include <QtWidgets/QStyleFactory>
+#include <QtCore/QPropertyAnimation>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QSystemTrayIcon>
 
-using std::printf;
 #define elif else if
-using str = std::string;
 using namespace std::literals;
 namespace fs = std::filesystem;
 
 bool KillerRunning = false;
-
-void print(const auto& ... args)
-{
-    (std::cout << ... << args) << std::flush;
-}
-void println(const auto& ... args)
-{
-    (std::cout << ... << args) << std::endl;
-}
-
-template <typename T>
-T str_to(const str& string)
-{
-    T temp;
-    std::stringstream ss;
-    ss << string;
-    ss >> temp;
-    return temp;
-}
-
-template <>
-QColor str_to(const str& string)
-{
-    uint R,G,B;
-    std::sscanf(string.c_str(), "(%u,%u,%u)", &R, &G, &B);
-    return QColor(R,G,B);
-}
+QSystemTrayIcon tray_icon{};
 
 void set_app_theme(QApplication& app, Ini::Section& theme)
 {
-    app.setStyle(QStyleFactory::create(theme["ThemeName"].c_str()));
+    app.setStyle(QStyleFactory::create(theme["ThemeName"]));
 
     auto myPalette = QPalette();  // Create Dark Palette
-    myPalette.setColor(QPalette::Window,     str_to<QColor>(theme["BgColor"]));
-    myPalette.setColor(QPalette::WindowText, str_to<QColor>(theme["TextColor"]));
-    myPalette.setColor(QPalette::Base,       str_to<QColor>(theme["BaseColor"]));
-    myPalette.setColor(QPalette::Text,       str_to<QColor>(theme["EditableTextColor"]));
-    myPalette.setColor(QPalette::Button,     str_to<QColor>(theme["ButtonColor"]));
-    myPalette.setColor(QPalette::ButtonText, str_to<QColor>(theme["ButtonTextColor"]));
-    myPalette.setColor(QPalette::Link,       str_to<QColor>(theme["LinkColor"]));
-    myPalette.setColor(QPalette::Highlight,  str_to<QColor>(theme["SliderColor"]));
+    myPalette.setColor(QPalette::Window,     QString_to_Qcolor(theme["BgColor"]));
+    myPalette.setColor(QPalette::WindowText, QString_to_Qcolor(theme["TextColor"]));
+    myPalette.setColor(QPalette::Base,       QString_to_Qcolor(theme["BaseColor"]));
+    myPalette.setColor(QPalette::Text,       QString_to_Qcolor(theme["EditableTextColor"]));
+    myPalette.setColor(QPalette::Button,     QString_to_Qcolor(theme["ButtonColor"]));
+    myPalette.setColor(QPalette::ButtonText, QString_to_Qcolor(theme["ButtonTextColor"]));
+    myPalette.setColor(QPalette::Link,       QString_to_Qcolor(theme["LinkColor"]));
+    myPalette.setColor(QPalette::Highlight,  QString_to_Qcolor(theme["SliderColor"]));
     app.setPalette(myPalette);
     
     char stylesheet[1024]  =  "";
-    auto ToolTipBaseColor  =  str_to<QColor>(theme["ToolTipBaseColor"]);
-    auto ToolTipTextColor  =  str_to<QColor>(theme["ToolTipTextColor"]);
+    auto ToolTipBaseColor  =  QString_to_Qcolor(theme["ToolTipBaseColor"]);
+    auto ToolTipTextColor  =  QString_to_Qcolor(theme["ToolTipTextColor"]);
 
     std::snprintf(stylesheet, sizeof(stylesheet), "QToolTip {color: rgb(%d, %d, %d); background-color: rgb(%d, %d, %d); border: 1px solid grey;}",
         ToolTipTextColor.red(), ToolTipTextColor.green(), ToolTipTextColor.blue(), ToolTipTextColor.red(), ToolTipTextColor.green(), ToolTipTextColor.blue());
 
     app.setStyleSheet(stylesheet);
-}
-
-bool cmd(const str& cmd)
-{
-    QProcess sp;
-    sp.start(cmd.c_str(), QStringList());
-
-    if (sp.waitForFinished())
-        if (sp.exitStatus() == QProcess::NormalExit)
-            return true;
-    
-    return false;
-}
-
-str cmd2(const str& cmd)
-{
-    QProcess sp;
-    sp.start(cmd.c_str(), QStringList());
-    
-    if (sp.waitForFinished())
-        return sp.readAll().toStdString();
-    else
-        throw sp.errorString().toStdString();
 }
 
 void haxx_on()
@@ -114,21 +71,21 @@ void haxx_off()
 
 int status()
 {
-    str s = cmd2(R"FucK(powershell -Command "Get-WindowsErrorReporting")FucK");
-    std::cout << s << std::endl;
+    auto s = cmd2(R"FucK(powershell -Command "Get-WindowsErrorReporting")FucK");
+    std::cout << s.toStdString() << std::endl;
     
     if   (s == "Enabled\r\n" ) return 1;
     elif (s == "Disabled\r\n") return 0;
     else return 6;
 }
 
-void warning(int time)
+void warning(int time_msec)
 {
-    printf("Toast !\n");
-    /*notify(AppName='BLauncher v1.19',
-                     TitleText='Potential Crash Warning !',
-                     BodyText='It is Recomended to Save any Unsaved Progress within 30 Seconds.',
-                     ImagePath='./assets/warn.png')*/
+    println("Sent Toast Notification!"_cyn);
+
+    tray_icon.showMessage("BLauncher: Potential Crash Warning !",
+                          "It is Recomended to Save any Unsaved Progress within 30 Seconds.",
+                          QIcon("./assets/warn.png"), time_msec);
 }
 
 void crash_fix()
@@ -166,7 +123,6 @@ void store_fix()
     catch (...) {
         println("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !"_bldred);
     }
-    fflush(stdout);
 }
 
 void tamer(uint tame1, uint tame2)
@@ -196,8 +152,12 @@ void tamer(uint tame1, uint tame2)
 int main(int argc, char* argv[])
 {
         QApplication app(argc, argv);
-        auto exe_path = QCoreApplication::applicationDirPath().toStdString();
-        std::cout << "app path = " << exe_path << std::endl;
+        auto exe_path = QCoreApplication::applicationDirPath();
+
+        tray_icon.setIcon(QIcon("assets/logo.png"));
+        tray_icon.setToolTip("BLauncher is Running!");
+        tray_icon.show();
+        
         Ui::window ui;
         QWidget win;
         ui.setupUi(&win);
@@ -206,11 +166,11 @@ int main(int argc, char* argv[])
         {
             Ini::File cfg(exe_path+"/settings.ini");
 
-            cfg["SLIDERS"]["S1"]            = std::to_string( ui.slider1        -> value()     );
-            cfg["SLIDERS"]["S2"]            = std::to_string( ui.slider2        -> value()     );
-            cfg["EXTRAS"]["NOTIF_AGREE"]    = std::to_string( ui.notif_agree    -> isChecked() );
-            cfg["EXTRAS"]["NOTIF_DURATION"] = std::to_string( ui.notif_duration -> value()     );
-            cfg["EXTRAS"]["CURRENT_THEME"]  = ui.comboBox -> currentText().toStdString();
+            cfg["SLIDERS"]["S1"]            = QString(std::to_string( ui.slider1        -> value()      ).c_str());
+            cfg["SLIDERS"]["S2"]            = QString(std::to_string( ui.slider2        -> value()      ).c_str());
+            cfg["EXTRAS"]["NOTIF_AGREE"]    = QString(std::to_string( ui.notif_agree    -> isChecked()  ).c_str());
+            cfg["EXTRAS"]["NOTIF_DURATION"] = QString(std::to_string( ui.notif_duration -> value()      ).c_str());
+            cfg["EXTRAS"]["CURRENT_THEME"]  =                       ( ui.comboBox       -> currentText())         ;
         };
 
         auto startf = [&]()
@@ -324,7 +284,7 @@ int main(int argc, char* argv[])
             ui.slider2->setValue(value); savef();
         });
 
-        for (auto& entry : fs::directory_iterator(exe_path+"/themes"))
+        for (auto& entry : fs::directory_iterator(exe_path.toStdString()+"/themes"))
         {
             if (entry.is_regular_file() && entry.path().string().ends_with(".blt"))
                 ui.comboBox->addItem(entry.path().stem().string().c_str());
@@ -333,23 +293,23 @@ int main(int argc, char* argv[])
         QObject::connect(ui.comboBox, &QComboBox::currentTextChanged, [&](const QString& ThemeName)
         {
             Ini::File theme;
-            theme.load(exe_path+"/themes/"+ThemeName.toStdString()+".blt");
+            theme.load(exe_path+"/themes/"+ThemeName+".blt");
             auto THEME = theme["THEME"];
-            ui.auth_name->setText(THEME["AuthorName"].c_str());
+            ui.auth_name->setText(THEME["AuthorName"]);
 
             set_app_theme(app, THEME);
         });
 
         // Loading last used values
-        if (fs::exists(exe_path+"/settings.ini"))
+        if (fs::exists(exe_path.toStdString()+"/settings.ini"))
         {
             Ini::File cfg; cfg.load(exe_path+"/settings.ini");
 
-            ui.slider1        -> setValue(str_to<int>(cfg["SLIDERS"]["S1"]));
-            ui.slider2        -> setValue(str_to<int>(cfg["SLIDERS"]["S2"]));
-            ui.notif_agree    -> setChecked(str_to<bool>(cfg["EXTRAS"]["NOTIF_AGREE"]));
-            ui.notif_duration -> setValue(str_to<int>(cfg["EXTRAS"]["NOTIF_DURATION"]));
-            ui.comboBox       -> setCurrentText(cfg["EXTRAS"]["CURRENT_THEME"].c_str());
+            ui.slider1        -> setValue(cfg["SLIDERS"]["S1"].toInt());
+            ui.slider2        -> setValue(cfg["SLIDERS"]["S2"].toInt());
+            ui.notif_agree    -> setChecked(cfg["EXTRAS"]["NOTIF_AGREE"].toInt());
+            ui.notif_duration -> setValue(cfg["EXTRAS"]["NOTIF_DURATION"].toInt());
+            ui.comboBox       -> setCurrentText(cfg["EXTRAS"]["CURRENT_THEME"]);
         }
 
         win.show();
