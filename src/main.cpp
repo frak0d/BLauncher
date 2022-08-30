@@ -1,4 +1,7 @@
+#include <algorithm>
+#include <cstdio>
 #include <tuple>
+#include <queue>
 #include <string>
 #include <cstdlib>
 #include <cstdint>
@@ -10,32 +13,56 @@
 
 #include "cmd.cpp"
 #include "nini.cpp"
-#include "print.cpp"
+#include "qtextedit.h"
 #include "sleep.cpp"
 #include "colors.cpp"
 #include "str2color.cpp"
 
 #include <ui_main.h>
 
+//#include <QtPlugin>
+
 #include <QtGui/QIcon>
+#include <QtCore/QTimer>
 #include <QtGui/QPalette>
 #include <QtCore/QString>
-#include <QtWidgets/QStyleFactory>
-#include <QtCore/QPropertyAnimation>
+#include <QtGui/QTextCursor>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QStyleFactory>
 #include <QtWidgets/QSystemTrayIcon>
+#include <QtCore/QPropertyAnimation>
 
 #define elif else if
 using namespace std::literals;
 namespace fs = std::filesystem;
 
 bool KillerRunning = false;
-QSystemTrayIcon tray_icon{};
+QSystemTrayIcon* tray_icon;
+std::queue<QString> print_queue;
+
+std::ostream& operator<< (std::ostream& out, const QString& str)
+{
+    return out << str.toStdString();
+}
+
+void print(const auto& ...args)
+{
+    std::stringstream ss;
+    (ss << ... << args);
+    print_queue.emplace(ss.str().c_str());
+}
+
+void println(const auto& ...args)
+{
+    std::stringstream ss;
+    (ss << ... << args) << '\n';
+    print_queue.emplace(ss.str().c_str());
+};
 
 void set_app_theme(QApplication& app, Ini::Section& theme)
 {
     app.setStyle(QStyleFactory::create(theme["ThemeName"]));
-
+    
     auto myPalette = QPalette();  // Create Dark Palette
     myPalette.setColor(QPalette::Window,     QString_to_Qcolor(theme["BgColor"]));
     myPalette.setColor(QPalette::WindowText, QString_to_Qcolor(theme["TextColor"]));
@@ -50,10 +77,10 @@ void set_app_theme(QApplication& app, Ini::Section& theme)
     char stylesheet[1024]  =  "";
     auto ToolTipBaseColor  =  QString_to_Qcolor(theme["ToolTipBaseColor"]);
     auto ToolTipTextColor  =  QString_to_Qcolor(theme["ToolTipTextColor"]);
-
+    
     std::snprintf(stylesheet, sizeof(stylesheet), "QToolTip {color: rgb(%d, %d, %d); background-color: rgb(%d, %d, %d); border: 1px solid grey;}",
-        ToolTipTextColor.red(), ToolTipTextColor.green(), ToolTipTextColor.blue(), ToolTipTextColor.red(), ToolTipTextColor.green(), ToolTipTextColor.blue());
-
+        ToolTipTextColor.red(), ToolTipTextColor.green(), ToolTipTextColor.blue(), ToolTipBaseColor.red(), ToolTipBaseColor.green(), ToolTipBaseColor.blue());
+    
     app.setStyleSheet(stylesheet);
 }
 
@@ -72,7 +99,7 @@ void haxx_off()
 int status()
 {
     auto s = cmd2(R"FucK(powershell -Command "Get-WindowsErrorReporting")FucK");
-    std::cout << s.toStdString() << std::endl;
+    std::cout << s << std::endl;
     
     if   (s == "Enabled\r\n" ) return 1;
     elif (s == "Disabled\r\n") return 0;
@@ -82,8 +109,8 @@ int status()
 void warning(int time_msec)
 {
     println("Sent Toast Notification!"_cyn);
-
-    tray_icon.showMessage("BLauncher: Potential Crash Warning !",
+    
+    tray_icon->showMessage("BLauncher: Potential Crash Warning !",
                           "It is Recomended to Save any Unsaved Progress within 30 Seconds.",
                           QIcon("./assets/warn.png"), time_msec);
 }
@@ -141,7 +168,7 @@ void tamer(uint tame1, uint tame2)
                 print("\nOOPS SOMETHING WENT WRONG...\n"_red);
                 print("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n"_bldred);
             }
-
+            
             sleep_for(tame2-30, "s");
             //if (self.notif_agree.isChecked())
             //    warning(self.notif_duration.value());
@@ -152,19 +179,36 @@ void tamer(uint tame1, uint tame2)
 int main(int argc, char* argv[])
 {
         QApplication app(argc, argv);
-        auto exe_path = QCoreApplication::applicationDirPath();
+        fs::current_path(QCoreApplication::applicationDirPath().toStdString());
 
-        tray_icon.setIcon(QIcon("assets/logo.png"));
-        tray_icon.setToolTip("BLauncher is Running!");
-        tray_icon.show();
+        QSystemTrayIcon tray_icon_obj{};
+        tray_icon = &tray_icon_obj;
+        tray_icon->setIcon(QIcon("assets/logo.ico"));
+        tray_icon->setToolTip("BLauncher is Running!");
+        tray_icon->show();
         
         Ui::window ui;
         QWidget win;
         ui.setupUi(&win);
 
+        auto print_handler = [&ui]()
+        {
+            if (!print_queue.empty())
+            {
+                ui.console->moveCursor(QTextCursor::End);
+                ui.console->insertHtml(print_queue.front());
+                print_queue.pop();
+                ui.console->moveCursor(QTextCursor::End);
+            }
+        };
+
+        QTimer timer;
+        QObject::connect(&timer, &QTimer::timeout, print_handler);
+        timer.start(50/*ms*/);
+
         auto savef = [&]()
         {
-            Ini::File cfg(exe_path+"/settings.ini");
+            Ini::File cfg("settings.ini");
 
             cfg["SLIDERS"]["S1"]            = QString(std::to_string( ui.slider1        -> value()      ).c_str());
             cfg["SLIDERS"]["S2"]            = QString(std::to_string( ui.slider2        -> value()      ).c_str());
@@ -233,12 +277,12 @@ int main(int argc, char* argv[])
             if (win.width() == win.minimumWidth())
             {
                 TargetWidth = win.maximumWidth();
-                ui.optionb->setText("Options  <<");
+                ui.optionb->setText("Hide Options");
             }
             else
             {
                 TargetWidth = win.minimumWidth();
-                ui.optionb->setText("Options  >>");
+                ui.optionb->setText("Show Options");
             }
             
             QPropertyAnimation animation(&win, "geometry");
@@ -249,17 +293,41 @@ int main(int argc, char* argv[])
             animation.start();
         };
 
+        auto expandf2 = [&]()
+        {
+            int TargetHeight;
+
+            if (win.width() == win.minimumHeight())
+            {
+                TargetHeight = win.maximumHeight();
+                ui.consoleb->setText("Hide Console");
+            }
+            else
+            {
+                TargetHeight = win.minimumHeight();
+                ui.consoleb->setText("Show Console");
+            }
+            
+            QPropertyAnimation animation(&win, "geometry");
+            animation.setDuration(1000);
+            animation.setStartValue(QRect(win.x(), win.y(), win.width(), win.height()));
+            animation.setEndValue(QRect(win.x(), win.y(), win.width(), TargetHeight));
+            animation.setEasingCurve(QEasingCurve::OutCubic);
+            animation.start();
+        };
+
         QObject::connect(ui.fix1b, &QPushButton::clicked, crash_fix);
         QObject::connect(ui.fix2b, &QPushButton::clicked, store_fix);
 
-        QObject::connect(ui.startb,  &QPushButton::clicked, startf);
-        QObject::connect(ui.optionb, &QPushButton::clicked, expandf);
+        QObject::connect(ui.startb,   &QPushButton::clicked, startf);
+        QObject::connect(ui.optionb,  &QPushButton::clicked, expandf);
+        QObject::connect(ui.consoleb, &QPushButton::clicked, expandf2);
 
         QApplication::connect(&app, &QApplication::aboutToQuit, stopf);
 
-        QObject::connect(ui.notif_agree, &QCheckBox::stateChanged, [&](int state){savef();});
-        QObject::connect(ui.comboBox, QOverload<int>::of(&QComboBox::activated), [&](int index){savef();});
-        QObject::connect(ui.notif_duration, QOverload<int>::of(&QSpinBox::valueChanged), [&](int value){savef();});
+        QObject::connect(ui.notif_agree, &QCheckBox::stateChanged, [&](int){savef();});
+        QObject::connect(ui.comboBox, QOverload<int>::of(&QComboBox::activated), [&](int){savef();});
+        QObject::connect(ui.notif_duration, QOverload<int>::of(&QSpinBox::valueChanged), [&](int){savef();});
 
         QObject::connect(ui.DISCORD, &QPushButton::clicked, [](){cmd("start https://discord.gg/5pkSfFF");});
         QObject::connect(ui.YOUTUBE, &QPushButton::clicked, [](){cmd("start https://youtube.com/frakod?sub_confirmation=1");});
@@ -284,7 +352,7 @@ int main(int argc, char* argv[])
             ui.slider2->setValue(value); savef();
         });
 
-        for (auto& entry : fs::directory_iterator(exe_path.toStdString()+"/themes"))
+        for (auto& entry : fs::directory_iterator("themes"))
         {
             if (entry.is_regular_file() && entry.path().string().ends_with(".blt"))
                 ui.comboBox->addItem(entry.path().stem().string().c_str());
@@ -293,7 +361,7 @@ int main(int argc, char* argv[])
         QObject::connect(ui.comboBox, &QComboBox::currentTextChanged, [&](const QString& ThemeName)
         {
             Ini::File theme;
-            theme.load(exe_path+"/themes/"+ThemeName+".blt");
+            theme.load("themes/"+ThemeName+".blt");
             auto THEME = theme["THEME"];
             ui.auth_name->setText(THEME["AuthorName"]);
 
@@ -301,9 +369,9 @@ int main(int argc, char* argv[])
         });
 
         // Loading last used values
-        if (fs::exists(exe_path.toStdString()+"/settings.ini"))
+        if (fs::exists("settings.ini"))
         {
-            Ini::File cfg; cfg.load(exe_path+"/settings.ini");
+            Ini::File cfg; cfg.load("settings.ini");
 
             ui.slider1        -> setValue(cfg["SLIDERS"]["S1"].toInt());
             ui.slider2        -> setValue(cfg["SLIDERS"]["S2"].toInt());

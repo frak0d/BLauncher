@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>460</width>
-    <height>335</height>
+    <width>750</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>750</width>
-    <height>335</height>
+    <height>450</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -79,7 +79,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>170</y>
+     <y>130</y>
      <width>421</width>
      <height>68</height>
     </rect>
@@ -210,7 +210,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>250</y>
+     <y>210</y>
      <width>421</width>
      <height>68</height>
     </rect>
@@ -346,7 +346,7 @@
      <x>330</x>
      <y>17</y>
      <width>111</width>
-     <height>134</height>
+     <height>101</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -370,33 +370,6 @@
    <property name="flat">
     <bool>false</bool>
    </property>
-   <widget class="QPushButton" name="optionb">
-    <property name="geometry">
-     <rect>
-      <x>6</x>
-      <y>94</y>
-      <width>100</width>
-      <height>35</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>More Options !</string>
-    </property>
-    <property name="text">
-     <string>Options  &gt;&gt;</string>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normalon>../../../../.designer/backup/assets/configure.png</normalon>
-     </iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>16</width>
-      <height>16</height>
-     </size>
-    </property>
-   </widget>
    <widget class="QLabel" name="BL_LOGO">
     <property name="geometry">
      <rect>
@@ -729,7 +702,7 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <rect>
      <x>600</x>
      <y>20</y>
-     <width>60</width>
+     <width>81</width>
      <height>30</height>
     </rect>
    </property>
@@ -809,25 +782,83 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <number>1</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label_11">
+  <widget class="QTextEdit" name="console">
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>125</y>
-     <width>241</width>
-     <height>21</height>
+     <y>350</y>
+     <width>581</width>
+     <height>87</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>2</horstretch>
+     <verstretch>2</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <property name="undoRedoEnabled">
+    <bool>false</bool>
+   </property>
+   <property name="textInteractionFlags">
+    <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="optionb">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>290</y>
+     <width>131</width>
+     <height>35</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>More Options !</string>
    </property>
    <property name="text">
-    <string>Read Instructions Before Use !</string>
+    <string>Show Options</string>
    </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
+   <property name="icon">
+    <iconset>
+     <normalon>../../../../.designer/backup/assets/configure.png</normalon>
+    </iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="consoleb">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>290</y>
+     <width>131</width>
+     <height>35</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>More Options !</string>
+   </property>
+   <property name="text">
+    <string>Show Console</string>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normalon>../../../../.designer/backup/assets/configure.png</normalon>
+    </iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
    </property>
   </widget>
   <zorder>groupBox</zorder>
@@ -847,7 +878,9 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
   <zorder>comboBox</zorder>
   <zorder>label_9</zorder>
   <zorder>auth_name</zorder>
-  <zorder>label_11</zorder>
+  <zorder>console</zorder>
+  <zorder>optionb</zorder>
+  <zorder>consoleb</zorder>
  </widget>
  <tabstops>
   <tabstop>startb</tabstop>
