@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>450</height>
+    <width>460</width>
+    <height>335</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -56,7 +56,6 @@
    <property name="font">
     <font>
      <pointsize>25</pointsize>
-     <weight>50</weight>
      <italic>false</italic>
      <bold>false</bold>
      <underline>false</underline>
@@ -142,7 +141,6 @@
     <property name="font">
      <font>
       <pointsize>10</pointsize>
-      <weight>50</weight>
       <bold>false</bold>
       <stylestrategy>PreferAntialias</stylestrategy>
      </font>
@@ -193,7 +191,6 @@
     <property name="font">
      <font>
       <pointsize>12</pointsize>
-      <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
       <underline>false</underline>
@@ -276,7 +273,6 @@
     <property name="font">
      <font>
       <pointsize>10</pointsize>
-      <weight>50</weight>
       <bold>false</bold>
       <stylestrategy>PreferAntialias</stylestrategy>
      </font>
@@ -327,7 +323,6 @@
     <property name="font">
      <font>
       <pointsize>12</pointsize>
-      <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
       <underline>false</underline>
@@ -667,7 +662,6 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <property name="font">
      <font>
       <pointsize>13</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
       <underline>false</underline>
       <stylestrategy>PreferAntialias</stylestrategy>
@@ -782,31 +776,6 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     <number>1</number>
    </property>
   </widget>
-  <widget class="QTextEdit" name="console">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>350</y>
-     <width>581</width>
-     <height>87</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>2</horstretch>
-     <verstretch>2</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="acceptDrops">
-    <bool>false</bool>
-   </property>
-   <property name="undoRedoEnabled">
-    <bool>false</bool>
-   </property>
-   <property name="textInteractionFlags">
-    <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-   </property>
-  </widget>
   <widget class="QPushButton" name="optionb">
    <property name="geometry">
     <rect>
@@ -861,6 +830,43 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
     </size>
    </property>
   </widget>
+  <widget class="QTextEdit" name="console">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>342</y>
+     <width>420</width>
+     <height>90</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>2</horstretch>
+     <verstretch>2</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>420</width>
+     <height>90</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>710</width>
+     <height>90</height>
+    </size>
+   </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <property name="undoRedoEnabled">
+    <bool>false</bool>
+   </property>
+   <property name="textInteractionFlags">
+    <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+   </property>
+  </widget>
   <zorder>groupBox</zorder>
   <zorder>startb</zorder>
   <zorder>groupBox_3</zorder>
@@ -878,9 +884,9 @@ Focus Assist may mute the notifications so make sure to turn off Focus Assist in
   <zorder>comboBox</zorder>
   <zorder>label_9</zorder>
   <zorder>auth_name</zorder>
-  <zorder>console</zorder>
   <zorder>optionb</zorder>
   <zorder>consoleb</zorder>
+  <zorder>console</zorder>
  </widget>
  <tabstops>
   <tabstop>startb</tabstop>

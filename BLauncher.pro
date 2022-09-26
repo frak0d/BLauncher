@@ -1,5 +1,5 @@
 QT += core gui widgets
-CONFIG += qt warn_on ltcg static
+CONFIG += qt warn_on ltcg
 
 DISTFILES += assets/
 FORMS += gui/main.ui
