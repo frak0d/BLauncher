@@ -381,7 +381,7 @@
      <enum>Qt::PlainText</enum>
     </property>
     <property name="pixmap">
-     <pixmap>assets/bl_logo.png</pixmap>
+     <pixmap>assets/logo.png</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
