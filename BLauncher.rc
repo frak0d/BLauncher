@@ -1,0 +1,26 @@
+#include "winver.h"
+
+0 ICON "assets/logo.ico"
+
+1 VERSIONINFO
+FILEVERSION     2,0,0,2
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName",     "0xB00B\0"
+            VALUE "FileDescription", "A Proof of Concept Pirated Launcher for Minecraft Windows 10 Edition.\0"
+            VALUE "LegalCopyright",  "0xB00B\0"
+            VALUE "ProductName",     "BLauncher\0"
+            VALUE "ProductVersion",  "v2.0\0"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1259
+    END
+END
+
+2 RT_MANIFEST "BLauncher.manifest"

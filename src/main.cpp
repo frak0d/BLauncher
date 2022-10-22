@@ -20,6 +20,9 @@
 #include <ui_main.h>
 #include <windows.h>
 
+#pragma comment(lib, "User32.lib")
+#pragma comment(lib, "Advapi32.lib")
+
 #include <QtGui/QIcon>
 #include <QtCore/QTimer>
 #include <QtGui/QPalette>
@@ -64,6 +67,30 @@ void cwd2ExePath()
     auto exepath = std::string(buffer);
     auto dirpath = exepath.substr(0, exepath.find_last_of("\\/"));
     SetCurrentDirectoryA(dirpath.c_str());
+}
+
+bool iAmAdmin()
+{
+    bool IsElevated = false;
+    HANDLE hToken = NULL;
+    TOKEN_ELEVATION elevation;
+    DWORD dwSize;
+
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken))
+        goto Cleanup; // if Failed, we treat as False
+
+    if (!GetTokenInformation(hToken, TokenElevation, &elevation, sizeof(elevation), &dwSize))
+        goto Cleanup; // if Failed, we treat as False
+
+    IsElevated = elevation.TokenIsElevated;
+
+Cleanup:
+    if (hToken)
+    {
+        CloseHandle(hToken);
+        hToken = NULL;
+    }
+    return IsElevated;
 }
 
 void set_app_theme(QApplication& app, Ini::Section& theme)
@@ -128,8 +155,8 @@ void warning(int time_msec)
     println("Sent Toast Notification!"_cyn);
     
     tray_icon->showMessage("BLauncher: Potential Crash Warning !",
-                          "It is Recomended to Save any Unsaved Progress within 30 Seconds.",
-                          QIcon("./assets/warn.png"), time_msec);
+                           "It is Recomended to Save any Unsaved Progress within 30 Seconds.",
+                           QIcon("./assets/warn.png"), time_msec);
 }
 
 void crash_fix()
@@ -169,36 +196,48 @@ void store_fix()
     }
 }
 
-void tamer(uint tame1, uint tame2)
+void tamer(uint tame1, uint tame2, const Ui::window& ui)
 {
     KillerRunning = true;
     sleep_for(tame1, "s");
 
     while (true)
     {
-        try {
+        try
+        {
             cmd2("taskkill /f /im ClipSVC.exe");
             cmd2("taskkill /f /im RuntimeBroker.exe");
             print("DEATH NOTE ISSUED SUCCESSFULLY !\n");
         }
-        catch (...) {
+        catch (...)
+        {
             print("\nOOPS SOMETHING WENT WRONG...\n"_red);
             print("TRY RUNNING BLAUNCHER AS ADMINISTRATOR !\n"_bldred);
         }
 
         sleep_for(tame2-30, "s");
-        //if (self.notif_agree.isChecked())
-        //    warning(self.notif_duration.value());
+        if (ui.notif_agree->isChecked())
+            warning(ui.notif_duration->value());
         sleep_for(30, "s");
     }
 }
 
-void check_required_files()
+void check_startup_conditions()
 {
+    if (!iAmAdmin())
+    {
+        MessageBox(NULL, L"Please Run this Program as Administrator!", L"Fatal Error", MB_OK);
+        std::exit(100);
+    }
     if (!fs::exists("themes"))
     {
         MessageBox(NULL, L"'themes' directory not found, can't launch GUI.", L"Fatal Error", MB_OK);
         std::exit(101);
+    }
+    if (fs::is_empty("themes"))
+    {
+        MessageBox(NULL, L"No valid theme found, can't launch GUI.", L"Fatal Error", MB_OK);
+        std::exit(102);
     }
     if (!fs::exists("assets"))
     {
@@ -207,7 +246,7 @@ void check_required_files()
     if (!fs::exists("plugins/platforms/qwindows.dll"))
     {
         MessageBox(NULL, L"Qt 'windows' platform plugin not found, can't launch GUI.", L"Fatal Error", MB_OK);
-        std::exit(102);
+        std::exit(103);
     }
     if (!fs::exists("plugins/imageformats/qico.dll"))
     {
@@ -218,7 +257,7 @@ void check_required_files()
 int main(int argc, char* argv[])
 {
     cwd2ExePath();
-    check_required_files();
+    check_startup_conditions();
     QApplication app(argc, argv);
 
     QSystemTrayIcon tray_icon_obj{};
@@ -233,7 +272,7 @@ int main(int argc, char* argv[])
 
     auto print_handler = [&ui]()
     {
-        if (!print_queue.empty())
+        while (!print_queue.empty())
         {
             ui.console->moveCursor(QTextCursor::End);
             ui.console->insertHtml(print_queue.front());
@@ -244,7 +283,7 @@ int main(int argc, char* argv[])
 
     QTimer timer;
     QObject::connect(&timer, &QTimer::timeout, print_handler);
-    timer.start(50/*ms*/);
+    timer.start(250/*ms*/);
 
     auto savef = [&]()
     {
@@ -275,7 +314,7 @@ int main(int argc, char* argv[])
             try {
                 haxx_on();
                 cmd("explorer.exe shell:AppsFolder/Microsoft.MinecraftUWP_8wekyb3d8bbwe!App");
-                auto killer = std::thread(tamer, tame1, tame2);
+                auto killer = std::thread(tamer, tame1, tame2, ui);
                 killer.detach();
             }
             catch (...) {
