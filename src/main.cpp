@@ -265,6 +265,7 @@ int main(int argc, char* argv[])
     tray_icon->setIcon(QIcon("assets/logo.ico"));
     tray_icon->setToolTip("BLauncher is Running!");
     tray_icon->show();
+    std::atexit([]{tray_icon->~QSystemTrayIcon();});
 
     Ui::window ui;
     QWidget win;
